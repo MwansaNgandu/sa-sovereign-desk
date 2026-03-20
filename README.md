@@ -55,7 +55,7 @@ FX rates (USD/ZAR, EUR/ZAR, GBP/ZAR) are fetched from **Yahoo Finance** via a CO
 
 ### 2. Add Your Keys
 
-Open `sa-macro-tier1.html` in any text editor and find these three lines near the top of the `<script>` block (around line 678):
+Open `sa-macro-tier1.html` in any text editor and find these three lines near the top of the `<script>` block (around line 678): 
 
 ```js
 const FINNHUB_KEY  = 'YOUR_FINNHUB_API_KEY';
@@ -181,5 +181,6 @@ This dashboard is for educational, research, and analytical purposes only. It do
 ## Licence
 
 MIT — free to use, modify, and distribute with attribution.
-#   s a - s o v e r e i g n - d e s k  
+#   s a - s o v e r e i g n - d e s k 
+ 
  
