@@ -181,5 +181,3 @@ This dashboard is for educational, research, and analytical purposes only. It do
 ## Licence
 
 MIT — free to use, modify, and distribute with attribution.
- 
- 
