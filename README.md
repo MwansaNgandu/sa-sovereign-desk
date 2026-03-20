@@ -1,4 +1,4 @@
-# SA Sovereign Desk — Macro Intelligence Dashboard
+# SA Sovereign Desk - Macro Intelligence Dashboard
 
 A single-file, browser-based macro dashboard built for South Africa sovereign strategy analysis. Designed to replicate the kind of morning briefing tool used by institutional macro desks — covering fixed income, FX, commodities, equities, load shedding, China demand, freight, and a rules-based macro regime classifier.
 
@@ -181,3 +181,6 @@ This dashboard is for educational, research, and analytical purposes only. It do
 ## Licence
 
 MIT — free to use, modify, and distribute with attribution.
+#   s a - s o v e r e i g n - d e s k 
+ 
+ 
