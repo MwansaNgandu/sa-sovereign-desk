@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SA Sovereign Strategy — Tier-1 Macro Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:        #080808;
+  --bg1:       #0d0d0d;
+  --bg2:       #111111;
+  --bg3:       #161616;
+  --border:    rgba(255,255,255,0.055);
+  --border2:   rgba(255,255,255,0.10);
+  --gold:      #c8a84b;
+  --gold2:     #e4c97a;
+  --gold-dim:  rgba(200,168,75,0.12);
+  --gold-glow: rgba(200,168,75,0.28);
+  --green:     #2dd97a;
+  --green-dim: rgba(45,217,122,0.10);
+  --red:       #f04e52;
+  --red-dim:   rgba(240,78,82,0.10);
+  --amber:     #f59e0b;
+  --amber-dim: rgba(245,158,11,0.10);
+  --blue:      #5b8dee;
+  --blue-dim:  rgba(91,141,238,0.10);
+  --teal:      #2dd9c0;
+  --text:      #e2e2e2;
+  --text2:     rgba(226,226,226,0.55);
+  --text3:     rgba(226,226,226,0.28);
+  --mono:      'IBM Plex Mono', monospace;
+  --serif:     'Playfair Display', serif;
+  --sans:      'IBM Plex Sans', sans-serif;
+  --r:         4px;
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ───── SCROLLBAR ───── */
+::-webkit-scrollbar { width:3px; height:3px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:2px; }
+
+/* ───── HEADER ───── */
+.hdr {
+  position: sticky; top:0; z-index:200;
+  background: rgba(8,8,8,0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border2);
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 24px;
+  padding: 0 28px;
+  height: 58px;
+}
+.hdr-brand { display:flex; flex-direction:column; gap:2px; }
+.hdr-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .01em;
+}
+.hdr-sub {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.hdr-clock-block { text-align:right; }
+.hdr-clock { font-family:var(--mono); font-size:15px; color:var(--text); letter-spacing:.04em; }
+.hdr-date  { font-size:10px; color:var(--text3); letter-spacing:.04em; margin-top:1px; }
+.hdr-refresh { font-family:var(--mono); font-size:9px; color:var(--gold); letter-spacing:.06em; }
+
+/* ───── REGIME BANNER ───── */
+#regime-banner {
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg1);
+  flex-wrap: wrap;
+}
+.regime-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+.regime-label { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); }
+.regime-desc  { font-size:11px; color:var(--text2); max-width:420px; }
+.regime-confidence {
+  display:flex; flex-direction:column; gap:3px;
+  min-width:160px;
+}
+.regime-conf-label { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); }
+.conf-bars { display:flex; flex-direction:column; gap:2px; }
+.conf-bar-row { display:flex; align-items:center; gap:6px; }
+.conf-bar-name { font-size:9px; font-family:var(--mono); color:var(--text3); width:80px; }
+.conf-bar-track { flex:1; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+.conf-bar-fill  { height:100%; border-radius:2px; transition: width .6s ease; }
+.conf-pct { font-size:9px; font-family:var(--mono); color:var(--text3); width:28px; text-align:right; }
+
+/* ───── TICKER STRIP ───── */
+#ticker-wrap {
+  background:var(--bg1);
+  border-bottom:1px solid var(--border);
+  overflow-x:auto; scrollbar-width:none; white-space:nowrap; padding:0 28px;
+}
+#ticker-wrap::-webkit-scrollbar { display:none; }
+.ticker-inner { display:inline-flex; min-width:100%; }
+.tick {
+  display:inline-flex; align-items:center; gap:10px;
+  padding:11px 18px; border-right:1px solid var(--border);
+  cursor:default; flex-shrink:0; transition:background .15s;
+}
+.tick:hover { background:var(--bg2); }
+.tick:last-child { border-right:none; }
+.tick-lbl { font-size:9px; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--text3); }
+.tick-val { font-family:var(--mono); font-size:13px; font-weight:500; }
+.tick-chg { font-family:var(--mono); font-size:10px; display:flex; align-items:center; gap:2px; }
+.tick.up  .tick-val,.tick.up  .tick-chg { color:var(--green); }
+.tick.down .tick-val,.tick.down .tick-chg { color:var(--red); }
+.tick.flat .tick-val,.tick.flat .tick-chg { color:var(--amber); }
+.tick.up  .tick-val { text-shadow:0 0 14px rgba(45,217,122,.4); }
+.tick.down .tick-val { text-shadow:0 0 14px rgba(240,78,82,.4); }
+
+/* ───── LAYOUT ───── */
+.main { padding:24px 28px; max-width:1800px; margin:0 auto; }
+.section { margin-bottom:36px; }
+.sec-hdr {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:16px;
+}
+.sec-hdr-label {
+  font-size:9px; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); flex-shrink:0;
+}
+.sec-hdr-line { flex:1; height:1px; background:var(--border); }
+.sec-hdr-badge {
+  font-size:8px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  padding:2px 6px; border-radius:2px; flex-shrink:0;
+}
+.badge-live  { background:rgba(45,217,122,.12); color:var(--green); border:1px solid rgba(45,217,122,.2); }
+.badge-model { background:rgba(91,141,238,.12); color:var(--blue);  border:1px solid rgba(91,141,238,.2); }
+.badge-static { background:var(--gold-dim); color:var(--gold); border:1px solid rgba(200,168,75,.2); }
+.badge-warn  { background:rgba(240,78,82,.12); color:var(--red); border:1px solid rgba(240,78,82,.2); }
+
+/* ───── GRID SYSTEMS ───── */
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.grid-charts-main { display:grid; grid-template-columns:2fr 1.2fr; gap:12px; }
+.grid-charts-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.grid-china { display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:12px; }
+
+@media(max-width:1200px) { .grid-4{grid-template-columns:repeat(2,1fr);} .grid-charts-main{grid-template-columns:1fr;} .grid-charts-3{grid-template-columns:1fr 1fr;} .grid-china{grid-template-columns:1fr 1fr;} }
+@media(max-width:768px)  { .grid-4,.grid-3,.grid-2,.grid-charts-3,.grid-china{grid-template-columns:1fr;} }
+
+/* ───── CARDS ───── */
+.card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px;
+  position:relative;
+  transition:border-color .2s;
+}
+.card:hover { border-color:var(--border2); }
+.card-label { font-size:8px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:4px; }
+.card-name  { font-size:10px; color:var(--text3); margin-bottom:10px; letter-spacing:.02em; }
+.card-val   { font-family:var(--serif); font-size:28px; font-weight:700; line-height:1; color:var(--text); margin-bottom:6px; }
+.card-note  { font-size:9px; color:var(--text3); line-height:1.55; padding-top:7px; border-top:1px solid var(--border); margin-top:6px; }
+.card-upd   { font-size:8px; color:var(--text3); font-family:var(--mono); margin-top:3px; }
+.card-sub   { font-family:var(--mono); font-size:10px; color:var(--text2); margin-top:2px; }
+
+/* ───── CHART CARDS ───── */
+.chart-card {
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px;
+  transition:border-color .2s;
+}
+.chart-card:hover { border-color:var(--border2); }
+.chart-title { font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); margin-bottom:3px; }
+.chart-sub   { font-size:9px; color:var(--text3); margin-bottom:14px; }
+.chart-wrap  { position:relative; }
+
+/* ───── YIELD CURVE ───── */
+.yc-meta { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px; }
+.yc-spread {
+  display:flex; flex-direction:column; gap:1px;
+  padding:6px 10px; background:var(--bg3); border-radius:3px; border:1px solid var(--border);
+}
+.yc-spread-lbl { font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); }
+.yc-spread-val { font-family:var(--mono); font-size:13px; font-weight:500; color:var(--text); }
+.yc-spread-chg { font-family:var(--mono); font-size:9px; }
+
+/* ───── VOL SURFACE ───── */
+.vol-surface-grid {
+  display:grid;
+  gap:2px;
+}
+.vol-cell {
+  border-radius:2px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:var(--mono);
+  font-size:9px;
+  font-weight:500;
+  cursor:default;
+  transition:opacity .2s;
+  height:28px;
+}
+.vol-cell:hover { opacity:0.75; }
+.vol-axis-label { font-size:8px; color:var(--text3); font-family:var(--mono); text-align:center; }
+.vol-legend {
+  display:flex; align-items:center; gap:6px; margin-top:10px;
+  font-size:8px; color:var(--text3); font-family:var(--mono);
+}
+.vol-legend-bar {
+  flex:1; height:6px; border-radius:3px;
+  background:linear-gradient(to right, #1a3a52, #1d6491, #2196c4, #f59e0b, #ef4444, #991b1b);
+}
+
+/* ───── CDS TABLE ───── */
+.cds-table { width:100%; border-collapse:collapse; }
+.cds-table th { font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); text-align:left; padding:5px 8px 8px; border-bottom:1px solid var(--border); font-weight:500; }
+.cds-table td { padding:7px 8px; border-bottom:1px solid var(--border); font-size:12px; }
+.cds-table tr:last-child td { border-bottom:none; }
+.cds-country { color:var(--text); font-weight:500; }
+.cds-tenor   { font-family:var(--mono); font-size:11px; color:var(--text2); }
+.cds-spread  { font-family:var(--mono); font-size:12px; font-weight:500; }
+.cds-chg     { font-family:var(--mono); font-size:10px; }
+.cds-bar-wrap { width:80px; }
+.cds-bar { height:4px; border-radius:2px; background:var(--gold); }
+
+/* ───── PMI ───── */
+.pmi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.pmi-item { background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:10px 12px; }
+.pmi-country { font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); margin-bottom:2px; }
+.pmi-val { font-family:var(--mono); font-size:18px; font-weight:500; }
+.pmi-val.expand { color:var(--green); }
+.pmi-val.contract { color:var(--red); }
+.pmi-val.neutral { color:var(--amber); }
+.pmi-label { font-size:9px; color:var(--text3); margin-top:1px; }
+
+/* ───── FREIGHT ───── */
+.freight-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); }
+.freight-row:last-child { border-bottom:none; }
+.freight-name { font-size:11px; color:var(--text); }
+.freight-sub  { font-size:9px; color:var(--text3); margin-top:1px; }
+.freight-val  { font-family:var(--mono); font-size:13px; font-weight:500; }
+.freight-chg  { font-family:var(--mono); font-size:10px; text-align:right; margin-top:1px; }
+
+/* ───── CHINA INDICATORS ───── */
+.china-metric { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--border); }
+.china-metric:last-child { border-bottom:none; }
+.china-lbl { font-size:11px; color:var(--text2); }
+.china-val { font-family:var(--mono); font-size:13px; font-weight:500; }
+.china-trend { font-size:9px; font-family:var(--mono); color:var(--text3); margin-top:1px; text-align:right; }
+
+/* ───── TOT ───── */
+.tot-composites { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.tot-comp { background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:8px 12px; min-width:100px; }
+.tot-comp-lbl { font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); margin-bottom:2px; }
+.tot-comp-val { font-family:var(--mono); font-size:16px; font-weight:500; }
+
+/* ───── NEWS FEED ───── */
+.news-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.news-col   { display:flex; flex-direction:column; gap:0; }
+.news-item  {
+  padding:11px 0; border-bottom:1px solid var(--border);
+  display:grid; grid-template-columns:1fr auto; gap:10px; align-items:start;
+  transition:background .12s;
+}
+.news-item:last-child { border-bottom:none; }
+.news-item:hover { background:rgba(255,255,255,.02); margin:0 -8px; padding:11px 8px; border-radius:3px; }
+.news-hl   { font-size:12px; line-height:1.45; color:var(--text); }
+.news-hl a { color:inherit; text-decoration:none; transition:color .15s; }
+.news-hl a:hover { color:var(--gold); }
+.news-meta { font-size:9px; color:var(--text3); margin-top:3px; display:flex; align-items:center; gap:6px; font-family:var(--mono); }
+.news-tag  {
+  background:var(--gold-dim); color:var(--gold); border:1px solid rgba(200,168,75,.2);
+  font-size:8px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  padding:1px 5px; border-radius:2px; white-space:nowrap; flex-shrink:0;
+}
+
+/* ───── EQUITIES ───── */
+.eq-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; }
+.eq-card {
+  background:var(--bg2); border:1px solid var(--border); border-radius:var(--r);
+  padding:14px; transition:box-shadow .25s, border-color .25s;
+}
+.eq-card.up   { border-color:rgba(45,217,122,.18); box-shadow:0 0 20px rgba(45,217,122,.05); }
+.eq-card.down { border-color:rgba(240,78,82,.18);  box-shadow:0 0 20px rgba(240,78,82,.05); }
+.eq-card.flat { border-color:rgba(245,158,11,.14); }
+.eq-name { font-size:12px; font-weight:600; color:var(--text); }
+.eq-ticker { font-family:var(--mono); font-size:9px; color:var(--text3); letter-spacing:.08em; margin-top:2px; }
+.eq-price  { font-family:var(--mono); font-size:18px; font-weight:500; line-height:1; margin-top:8px; }
+.eq-price.up   { color:var(--green); }
+.eq-price.down { color:var(--red); }
+.eq-price.flat { color:var(--amber); }
+.eq-pct  { font-family:var(--mono); font-size:10px; }
+.eq-prev { font-size:9px; color:var(--text3); font-family:var(--mono); }
+.eq-divider { height:1px; background:var(--border); margin:8px 0; }
+.eq-consensus { font-family:var(--mono); font-size:10px; color:var(--text2); }
+.eq-news-item a { font-size:10px; color:var(--text3); text-decoration:none; display:block; padding:3px 0; border-top:1px solid var(--border); transition:color .15s; }
+.eq-news-item a:hover { color:var(--gold); }
+
+/* ───── RATING TABLE ───── */
+.rat-table { width:100%; border-collapse:collapse; }
+.rat-table td { padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.rat-table tr:last-child td { border-bottom:none; }
+.rat-agency  { color:var(--text3); font-size:9px; letter-spacing:.06em; text-transform:uppercase; }
+.rat-rating  { font-family:var(--mono); color:var(--gold); }
+.rat-outlook { font-size:9px; color:var(--text3); }
+.rat-action  { font-size:9px; }
+
+/* ───── LOADING SKELETON ───── */
+.skel { background:var(--bg3); border-radius:3px; animation:pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ───── MISC ───── */
+.err { font-size:10px; color:var(--text3); font-family:var(--mono); display:flex; align-items:center; gap:5px; padding:4px 0; }
+.err::before { content:'⚠'; color:var(--red); }
+.divider { height:1px; background:var(--border); margin:28px 0; }
+.ls-stage { font-family:var(--serif); font-size:40px; font-weight:900; line-height:1; }
+.ls-0   { color:var(--green);  text-shadow:0 0 24px rgba(45,217,122,.45); }
+.ls-low { color:var(--amber);  text-shadow:0 0 24px rgba(245,158,11,.45); }
+.ls-mid { color:#f97316;       text-shadow:0 0 24px rgba(249,115,22,.45); }
+.ls-hi  { color:var(--red);    text-shadow:0 0 24px rgba(240,78,82,.45); }
+.up-text   { color:var(--green); }
+.down-text { color:var(--red);   }
+.flat-text { color:var(--amber); }
+.gold-text { color:var(--gold);  }
+a { color:var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-title">SA Sovereign Strategy — Macro Intelligence</div>
+    <div class="hdr-sub">Tier-1 Sell-Side Research Platform · Institutional &amp; Policy Distribution</div>
+  </div>
+  <div class="hdr-clock-block">
+    <div class="hdr-clock" id="clock">--:--:--</div>
+    <div class="hdr-date"  id="dateline">—</div>
+    <div class="hdr-refresh" id="countdown">REFRESH IN 1:00</div>
+  </div>
+</header>
+
+<!-- ═══════════ REGIME BANNER ═══════════ -->
+<div id="regime-banner">
+  <div>
+    <div class="regime-label">Macro Regime Classifier</div>
+    <div id="regime-pill" class="regime-pill" style="color:var(--amber);border-color:rgba(245,158,11,.3);">
+      <span>⬤</span> <span id="regime-name">Detecting…</span>
+    </div>
+  </div>
+  <div class="regime-desc" id="regime-desc">Running multi-factor regime detection across FX momentum, yield curve, commodity complex, and risk sentiment signals…</div>
+  <div class="regime-confidence">
+    <div class="regime-conf-label">Signal Confidence</div>
+    <div class="conf-bars" id="conf-bars">
+      <div class="conf-bar-row"><span class="conf-bar-name">FX Momentum</span><div class="conf-bar-track"><div class="conf-bar-fill skel" style="width:100%;background:var(--bg3);"></div></div><span class="conf-pct">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TICKER STRIP ═══════════ -->
+<div id="ticker-wrap">
+  <div class="ticker-inner" id="ticker-inner">
+    <div class="tick"><div class="skel" style="width:160px;height:36px;border-radius:3px;"></div></div>
+    <div class="tick"><div class="skel" style="width:150px;height:36px;border-radius:3px;"></div></div>
+    <div class="tick"><div class="skel" style="width:150px;height:36px;border-radius:3px;"></div></div>
+    <div class="tick"><div class="skel" style="width:140px;height:36px;border-radius:3px;"></div></div>
+    <div class="tick"><div class="skel" style="width:140px;height:36px;border-radius:3px;"></div></div>
+    <div class="tick"><div class="skel" style="width:140px;height:36px;border-radius:3px;"></div></div>
+    <div class="tick"><div class="skel" style="width:160px;height:36px;border-radius:3px;"></div></div>
+    <div class="tick"><div class="skel" style="width:150px;height:36px;border-radius:3px;"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+
+  <!-- ── ROW 1: SAGB YIELD CURVE + VOL SURFACE + CDS ── -->
+  <section class="section">
+    <div class="sec-hdr"><div class="sec-hdr-label">Fixed Income · FX Derivatives · Sovereign Credit</div><div class="sec-hdr-line"></div><div class="sec-hdr-badge badge-model">Model</div></div>
+    <div class="grid-charts-main" style="grid-template-columns:1.4fr 1fr 1.2fr;gap:12px;">
+
+      <!-- SAGB Yield Curve -->
+      <div class="chart-card">
+        <div class="chart-title">SA Government Bond Yield Curve (SAGBs)</div>
+        <div class="chart-sub">Par yield curve · bps · bootstrapped from benchmark tenors</div>
+        <div class="yc-meta" id="yc-meta">
+          <div class="yc-spread"><span class="yc-spread-lbl">2s10s</span><span class="yc-spread-val" id="yc-2s10s">—</span><span class="yc-spread-chg" id="yc-2s10s-chg">—</span></div>
+          <div class="yc-spread"><span class="yc-spread-lbl">2s30s</span><span class="yc-spread-val" id="yc-2s30s">—</span><span class="yc-spread-chg" id="yc-2s30s-chg">—</span></div>
+          <div class="yc-spread"><span class="yc-spread-lbl">Real Yield 10Y</span><span class="yc-spread-val" id="yc-real">—</span><span class="yc-spread-chg" style="color:var(--text3);font-size:9px;">vs CPI 3.0%</span></div>
+        </div>
+        <div class="chart-wrap"><canvas id="yc-chart" height="200"></canvas></div>
+      </div>
+
+      <!-- ZAR Vol Surface -->
+      <div class="chart-card">
+        <div class="chart-title">USD/ZAR Implied Volatility Surface</div>
+        <div class="chart-sub">Indicative IV · tenor × delta grid · % annualised</div>
+        <div id="vol-surface-container" style="margin-top:4px;"></div>
+        <div class="vol-legend">
+          <span>Low IV</span>
+          <div class="vol-legend-bar"></div>
+          <span>High IV</span>
+        </div>
+      </div>
+
+      <!-- CDS Spreads -->
+      <div class="chart-card">
+        <div class="chart-title">Sovereign CDS Spreads</div>
+        <div class="chart-sub">5Y USD CDS · bps · EM peer comparison <span style="color:var(--red);font-size:8px;">▲ Last sourced: Mar 2025</span></div>
+        <table class="cds-table" id="cds-table">
+          <thead><tr>
+            <th>Country</th><th>5Y bps</th><th>Δ 1M</th><th>Relative</th>
+          </tr></thead>
+          <tbody id="cds-tbody"></tbody>
+        </table>
+        <div class="chart-wrap" style="margin-top:14px;"><canvas id="cds-chart" height="130"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ROW 2: MACRO SNAPSHOT CARDS ── -->
+  <section class="section">
+    <div class="sec-hdr"><div class="sec-hdr-label">SA Sovereign &amp; Macro Snapshot</div><div class="sec-hdr-line"></div></div>
+    <div class="grid-4" id="macro-cards">
+
+      <div class="card">
+        <div class="card-label">Monetary Policy</div>
+        <div class="card-name">SARB Repo Rate <span class="sec-hdr-badge badge-static" style="font-size:7px;padding:1px 4px;">Static</span></div>
+        <div class="card-val">6.75%</div>
+        <div class="card-sub">Real rate: +3.75% vs CPI 3.0%</div>
+        <div class="card-note">SARB cutting cycle underway since Sep 2024. 275bps of cuts delivered. MPC meets quarterly — monitor sarb.co.za for next decision.</div>
+        <div class="card-upd">Effective: Nov 2025 · SARB MPC</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Inflation</div>
+        <div class="card-name">CPI (y/y) <span class="sec-hdr-badge badge-static" style="font-size:7px;padding:1px 4px;">Static</span></div>
+        <div class="card-val">3.0%</div>
+        <div class="card-sub">At lower bound of SARB 3–6% target band</div>
+        <div class="card-note">Significant disinflation from 5.3% peak. Hits SARB's preferred midpoint target exactly. Raises prospect of further rate cuts if sustained.</div>
+        <div class="card-upd">February 2026 · Stats SA</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Fixed Income</div>
+        <div class="card-name">10Y SAGB Yield <span class="sec-hdr-badge badge-model" style="font-size:7px;padding:1px 4px;" id="bond-badge">Model</span></div>
+        <div id="bond-val"><div class="skel" style="height:28px;width:60%;margin:6px 0;"></div></div>
+        <div class="card-note" id="bond-note">R2035 benchmark. Term premium elevated vs peers. Watch SARB/NT issuance calendar.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Sovereign Credit</div>
+        <div class="card-name">Ratings Matrix <span class="sec-hdr-badge badge-static" style="font-size:7px;padding:1px 4px;">Static</span></div>
+        <table class="rat-table">
+          <tr><td class="rat-agency">Moody's</td><td class="rat-rating">Ba2</td><td class="rat-outlook">Stable</td><td class="rat-action" style="color:var(--amber);">—</td></tr>
+          <tr><td class="rat-agency">S&amp;P</td><td class="rat-rating">BB</td><td class="rat-outlook">Positive</td><td class="rat-action" style="color:var(--green);">↑ Upgraded</td></tr>
+          <tr><td class="rat-agency">Fitch</td><td class="rat-rating">BB−</td><td class="rat-outlook">Stable</td><td class="rat-action" style="color:var(--amber);">—</td></tr>
+        </table>
+        <div class="card-upd">S&amp;P upgraded Nov 2025 · 3 notches from IG</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Energy / Infrastructure</div>
+        <div class="card-name">Load Shedding <span class="sec-hdr-badge badge-live" style="font-size:7px;padding:1px 4px;" id="ls-badge">Live</span></div>
+        <div id="ls-val"><div class="skel" style="height:40px;width:70px;margin:6px 0;"></div></div>
+        <div class="card-note" id="ls-note">EskomSePush live signal. Stage 3+ associated with ~1.5% GDP drag per annum.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Current Account</div>
+        <div class="card-name">CA Balance <span class="sec-hdr-badge badge-static" style="font-size:7px;padding:1px 4px;" id="ca-badge">Static</span></div>
+        <div id="ca-val"><div class="card-val">−1.8%</div><div class="card-sub">of GDP · Q4 2024</div></div>
+        <div class="card-note">Narrowed from −2.9% on commodity export recovery. Rand remains structurally vulnerable to EM risk-off episodes.</div>
+        <div class="card-upd">SARB Quarterly Bulletin · Dec 2024</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Fiscal</div>
+        <div class="card-name">Budget Deficit <span class="sec-hdr-badge badge-static" style="font-size:7px;padding:1px 4px;">Static</span></div>
+        <div class="card-val">−4.5%</div>
+        <div class="card-sub">of GDP · FY2024/25 revised</div>
+        <div id="debt-val" style="display:none;"></div>
+        <div class="card-note">Revised down from −4.7% in NT 2026 Budget Review. SOE contingent liability risk persists. Debt stabilisation path intact but fragile.</div>
+        <div class="card-upd">NT Budget Review 2026</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">FX Reserves</div>
+        <div class="card-name">Gross Reserves <span class="sec-hdr-badge badge-static" style="font-size:7px;padding:1px 4px;" id="res-badge">Static</span></div>
+        <div id="res-val"><div class="card-val">$63.4bn</div><div class="card-sub">5.1 months import cover</div></div>
+        <div class="card-note">Net reserves $56.2bn. IMF adequacy metric: ~122%. SARB does not actively intervene; reserves held for precautionary liquidity.</div>
+        <div class="card-upd">SARB · Feb 2025</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── ROW 3: TERMS OF TRADE + PMI + FREIGHT ── -->
+  <section class="section">
+    <div class="sec-hdr"><div class="sec-hdr-label">Terms of Trade · PMI Composite · Freight &amp; Container</div><div class="sec-hdr-line"></div><div class="sec-hdr-badge badge-static">Updated Monthly</div></div>
+    <div class="grid-charts-3">
+
+      <!-- Terms of Trade -->
+      <div class="chart-card">
+        <div class="chart-title">SA Terms of Trade Index</div>
+        <div class="chart-sub">Export commodity basket ÷ import basket · index 100 = 2015</div>
+        <div class="tot-composites" id="tot-composites">
+          <div class="tot-comp"><div class="tot-comp-lbl">Export Basket</div><div class="tot-comp-val gold-text" id="tot-exp">—</div></div>
+          <div class="tot-comp"><div class="tot-comp-lbl">Import Basket</div><div class="tot-comp-val" id="tot-imp">—</div></div>
+          <div class="tot-comp"><div class="tot-comp-lbl">ToT Ratio</div><div class="tot-comp-val" id="tot-ratio">—</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="tot-chart" height="160"></canvas></div>
+      </div>
+
+      <!-- PMI Composite -->
+      <div class="chart-card">
+        <div class="chart-title">PMI Composite — Key Economies</div>
+        <div class="chart-sub">Manufacturing PMI · >50 = expansion · <50 = contraction</div>
+        <div class="pmi-grid" id="pmi-grid">
+          <div class="pmi-item"><div class="pmi-country">SA</div><div class="skel" style="height:18px;width:40px;margin:4px 0;"></div></div>
+          <div class="pmi-item"><div class="pmi-country">China</div><div class="skel" style="height:18px;width:40px;margin:4px 0;"></div></div>
+          <div class="pmi-item"><div class="pmi-country">Global</div><div class="skel" style="height:18px;width:40px;margin:4px 0;"></div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="pmi-chart" height="140"></canvas></div>
+      </div>
+
+      <!-- Freight & Container -->
+      <div class="chart-card">
+        <div class="chart-title">Freight &amp; Container Flow Indicators</div>
+        <div class="chart-sub">Global trade proxies — structural SA export/import context</div>
+        <div id="freight-list">
+          <div class="freight-row">
+            <div><div class="freight-name">Baltic Dry Index (BDI)</div><div class="freight-sub">Dry bulk · iron ore, coal, grain</div></div>
+            <div><div class="freight-val" id="bdi-val"><span class="skel" style="display:inline-block;width:60px;height:13px;"></span></div><div class="freight-chg" id="bdi-chg">—</div></div>
+          </div>
+          <div class="freight-row">
+            <div><div class="freight-name">Shanghai Container Index (SCFI)</div><div class="freight-sub">Container spot rates · export routes</div></div>
+            <div><div class="freight-val" id="scfi-val"><span class="skel" style="display:inline-block;width:60px;height:13px;"></span></div><div class="freight-chg" id="scfi-chg">—</div></div>
+          </div>
+          <div class="freight-row">
+            <div><div class="freight-name">Cape of Good Hope Transits</div><div class="freight-sub">Monthly vessel count · UNCTAD proxy</div></div>
+            <div><div class="freight-val" id="cgh-val">382</div><div class="freight-chg up-text" id="cgh-chg">+14% YoY</div></div>
+          </div>
+          <div class="freight-row">
+            <div><div class="freight-name">Durban Port TEU Throughput</div><div class="freight-sub">Container units · Transnet data</div></div>
+            <div><div class="freight-val" id="dbn-val">172k</div><div class="freight-chg down-text" id="dbn-chg">−3.1% MoM</div></div>
+          </div>
+          <div class="freight-row">
+            <div><div class="freight-name">Richards Bay Coal Exports</div><div class="freight-sub">Mt/month · spot charter equivalents</div></div>
+            <div><div class="freight-val" id="rbc-val">6.1Mt</div><div class="freight-chg up-text" id="rbc-chg">+8.2% MoM</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── ROW 4: CHINA DEMAND INDICATORS ── -->
+  <section class="section">
+    <div class="sec-hdr"><div class="sec-hdr-label">China Commodity Demand Complex</div><div class="sec-hdr-line"></div><div class="sec-hdr-badge badge-live">Live Prices</div></div>
+    <div class="grid-china">
+
+      <!-- China macro metrics -->
+      <div class="chart-card">
+        <div class="chart-title">China Demand Indicators</div>
+        <div class="chart-sub">SA exports 40% to China · direct commodity demand pass-through</div>
+        <div id="china-metrics">
+          <div class="china-metric"><span class="china-lbl">NBS Manufacturing PMI</span><div style="text-align:right"><div class="china-val" id="cn-pmi">49.0</div><div class="china-trend down-text">↓ Contracting · from 49.3</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Caixin Services PMI</span><div style="text-align:right"><div class="china-val" id="cn-svc">56.7</div><div class="china-trend up-text">↑ Expansionary · from 52.3</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Steel Production (Mt/mo)</span><div style="text-align:right"><div class="china-val" id="cn-steel">80.2</div><div class="china-trend down-text">−3.6% YoY · Jan–Feb avg</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Iron Ore Port Inventories</span><div style="text-align:right"><div class="china-val" id="cn-inv">155.4Mt</div><div class="china-trend down-text">Highest since 2022</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Property New Starts (m²)</span><div style="text-align:right"><div class="china-val" id="cn-prop">−15%</div><div class="china-trend down-text">YoY decline persists</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Copper Cathode Imports (kt)</span><div style="text-align:right"><div class="china-val" id="cn-cu">260kt</div><div class="china-trend down-text">↓ Tariff arbitrage diversion</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Crude Steel Apparent Demand</span><div style="text-align:right"><div class="china-val" id="cn-std">76Mt</div><div class="china-trend down-text">−3.8% YoY</div></div></div>
+        </div>
+      </div>
+
+      <!-- Live commodity prices — SA export complex -->
+      <div class="chart-card">
+        <div class="chart-title">SA Export Commodity Complex</div>
+        <div class="chart-sub">Live spot prices — Finnhub · USD</div>
+        <div id="commodity-list">
+          <div class="china-metric"><span class="china-lbl">Brent Crude</span><div style="text-align:right"><div class="china-val" id="c-brent">—</div><div class="china-trend" id="c-brent-chg">—</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Gold (XAU/USD)</span><div style="text-align:right"><div class="china-val" id="c-gold">—</div><div class="china-trend" id="c-gold-chg">—</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Platinum (XPT/USD)</span><div style="text-align:right"><div class="china-val" id="c-plat">—</div><div class="china-trend" id="c-plat-chg">—</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Palladium</span><div style="text-align:right"><div class="china-val" id="c-pall">—</div><div class="china-trend" id="c-pall-chg">—</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Iron Ore 62% Fe ($/t)</span><div style="text-align:right"><div class="china-val" id="c-iron">$98.40</div><div class="china-trend down-text">−4.2% MTD</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Coal (Richards Bay API4)</span><div style="text-align:right"><div class="china-val" id="c-coal">$94.20</div><div class="china-trend up-text">+2.1% MTD</div></div></div>
+          <div class="china-metric"><span class="china-lbl">Chrome Ore (UG2, $/t)</span><div style="text-align:right"><div class="china-val">$185</div><div class="china-trend flat-text">Flat MTD</div></div></div>
+        </div>
+      </div>
+
+      <!-- Commodity vs ZAR correlation chart -->
+      <div class="chart-card">
+        <div class="chart-title">Commodity/ZAR Correlation Matrix</div>
+        <div class="chart-sub">6-month rolling correlation · commodity prices vs USD/ZAR</div>
+        <div class="chart-wrap" style="margin-top:8px;"><canvas id="corr-chart" height="260"></canvas></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── ROW 5: JSE EQUITIES ── -->
+  <section class="section">
+    <div class="sec-hdr"><div class="sec-hdr-label">JSE Equities Watch</div><div class="sec-hdr-line"></div><div class="sec-hdr-badge badge-live">Yahoo Finance</div></div>
+    <div class="eq-grid" id="equities-grid">
+      <div class="eq-card"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:20px;width:35%;margin-bottom:6px;"></div><div class="skel" style="height:10px;width:80%;"></div></div>
+      <div class="eq-card"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:20px;width:35%;margin-bottom:6px;"></div><div class="skel" style="height:10px;width:80%;"></div></div>
+      <div class="eq-card"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:20px;width:35%;margin-bottom:6px;"></div><div class="skel" style="height:10px;width:80%;"></div></div>
+      <div class="eq-card"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:20px;width:35%;margin-bottom:6px;"></div><div class="skel" style="height:10px;width:80%;"></div></div>
+      <div class="eq-card"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:20px;width:35%;margin-bottom:6px;"></div><div class="skel" style="height:10px;width:80%;"></div></div>
+      <div class="eq-card"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:20px;width:35%;margin-bottom:6px;"></div><div class="skel" style="height:10px;width:80%;"></div></div>
+      <div class="eq-card"><div class="skel" style="height:14px;width:55%;margin-bottom:8px;"></div><div class="skel" style="height:20px;width:35%;margin-bottom:6px;"></div><div class="skel" style="height:10px;width:80%;"></div></div>
+    </div>
+  </section>
+
+  <!-- ── ROW 6: NEWS FEED ── -->
+  <section class="section">
+    <div class="sec-hdr"><div class="sec-hdr-label">Policy &amp; Macro Intelligence Feed</div><div class="sec-hdr-line"></div></div>
+    <div class="news-grid" id="news-feed">
+      <div class="news-col">
+        <div class="news-item"><div><div class="skel" style="height:12px;width:100%;margin-bottom:6px;"></div><div class="skel" style="height:12px;width:80%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:60%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:90%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:50%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:95%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:55%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:88%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:62%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:92%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:48%;"></div></div></div>
+      </div>
+      <div class="news-col">
+        <div class="news-item"><div><div class="skel" style="height:12px;width:100%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:60%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:85%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:55%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:93%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:50%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:96%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:65%;"></div></div></div>
+        <div class="news-item"><div><div class="skel" style="height:12px;width:90%;margin-bottom:6px;"></div><div class="skel" style="height:9px;width:52%;"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  API KEYS
+// ══════════════════════════════════════════════════════
+const FINNHUB_KEY           = 'YOUR_FINNHUB_API_KEY';
+const ESP_KEY               = 'YOUR_ESKOMSEPUSH_API_KEY';
+const NEWSAPI_KEY           = 'YOUR_NEWSAPI_KEY';
+
+// ══════════════════════════════════════════════════════
+//  CORS PROXY CASCADE
+//  Tries each proxy in order until one succeeds.
+//  Yahoo Finance requires a proxy due to browser CORS policy.
+// ══════════════════════════════════════════════════════
+const CORS_PROXIES = [
+  url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
+
+async function fetchViaProxy(targetUrl) {
+  let lastErr;
+  for (const proxyFn of CORS_PROXIES) {
+    try {
+      const proxyUrl = proxyFn(targetUrl);
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+      const r = await fetch(proxyUrl, { signal: ctrl.signal });
+      clearTimeout(t);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const text = await r.text();
+      // Some proxies wrap in JSON, others return raw — handle both
+      try { return JSON.parse(text); }
+      catch(e) {
+        // Try extracting JSON from wrapped response
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) return JSON.parse(match[0]);
+        throw new Error('unparseable response');
+      }
+    } catch(e) {
+      lastErr = e;
+      continue; // try next proxy
+    }
+  }
+  throw lastErr || new Error('all proxies failed');
+}
+
+// ══════════════════════════════════════════════════════
+//  CLOCK & REFRESH TIMER
+// ══════════════════════════════════════════════════════
+let countdown = 60;
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent = n.toLocaleTimeString('en-ZA',{hour12:false});
+  document.getElementById('dateline').textContent = n.toLocaleDateString('en-ZA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+function tickCountdown() {
+  countdown--;
+  if (countdown <= 0) { countdown = 60; fetchLiveData(); }
+  const m = Math.floor(countdown/60), s = countdown%60;
+  document.getElementById('countdown').textContent = `REFRESH IN ${m}:${String(s).padStart(2,'0')}`;
+}
+setInterval(updateClock, 1000);
+setInterval(tickCountdown, 1000);
+updateClock();
+
+// ══════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════
+const dir = v => v > 0.01 ? 'up' : v < -0.01 ? 'down' : 'flat';
+const arrow = v => v > 0.01 ? '↑' : v < -0.01 ? '↓' : '↔';
+const pct = (v, dp=2) => `${v>=0?'+':''}${v.toFixed(dp)}%`;
+const fmtNum = (v, dp=2) => v >= 1000 ? v.toLocaleString('en',{minimumFractionDigits:dp,maximumFractionDigits:dp}) : v.toFixed(dp);
+const dirColor = d => d==='up' ? '#2dd97a' : d==='down' ? '#f04e52' : '#f59e0b';
+function timeAgo(s) {
+  const d = (Date.now()-new Date(s))/1000;
+  if(d<60) return `${~~d}s ago`;
+  if(d<3600) return `${~~(d/60)}m ago`;
+  if(d<86400) return `${~~(d/3600)}h ago`;
+  return `${~~(d/86400)}d ago`;
+}
+async function apiFetch(url, opts={}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(),12000);
+  try {
+    const r = await fetch(url,{...opts,signal:ctrl.signal});
+    clearTimeout(t);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch(e) { clearTimeout(t); throw e; }
+}
+
+// ══════════════════════════════════════════════════════
+//  CHART.JS GLOBAL DEFAULTS
+// ══════════════════════════════════════════════════════
+Chart.defaults.color = 'rgba(226,226,226,0.45)';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 9;
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.plugins.tooltip.backgroundColor = '#1a1a1a';
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(255,255,255,0.10)';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.titleColor = '#c8a84b';
+Chart.defaults.plugins.tooltip.bodyColor = '#e2e2e2';
+Chart.defaults.plugins.tooltip.padding = 10;
+
+let ycChart, totChart, pmiChart, cdsChart, corrChart;
+
+// ══════════════════════════════════════════════════════
+//  SAGB YIELD CURVE
+// ══════════════════════════════════════════════════════
+// SA benchmark bond yields — updated March 2026
+// Curve has rallied ~95bps from Mar 2025 levels reflecting SARB cutting cycle (275bps cuts)
+// and disinflation to 3.0%. 10Y anchored at ~8.80%, curve remains positively sloped.
+const SAGB_BASE = {
+  '3M':6.85, '6M':7.05, '1Y':7.20, '2Y':7.55, '3Y':7.85,
+  '5Y':8.30, '7Y':8.60, '10Y':8.80, '15Y':9.20, '20Y':9.55, '30Y':9.90
+};
+// Previous day curve for spread calculations
+const SAGB_PREV = {
+  '3M':6.82, '6M':7.02, '1Y':7.18, '2Y':7.52, '3Y':7.82,
+  '5Y':8.27, '7Y':8.57, '10Y':8.76, '15Y':9.16, '20Y':9.51, '30Y':9.86
+};
+
+async function buildYieldCurve(sarbAnchors) {
+  let yields = {...SAGB_BASE};
+
+  // Priority 1: Use SARB scraped anchors if available
+  if (sarbAnchors && Object.keys(sarbAnchors).length >= 2) {
+    const anchorTenors = Object.keys(sarbAnchors);
+    anchorTenors.forEach(tenor => { if(yields[tenor]!==undefined) yields[tenor]=sarbAnchors[tenor]; });
+    let totalShift=0, shiftCount=0;
+    anchorTenors.forEach(tenor => { if(SAGB_BASE[tenor]){totalShift+=sarbAnchors[tenor]-SAGB_BASE[tenor];shiftCount++;} });
+    const avgShift = shiftCount>0 ? totalShift/shiftCount : 0;
+    Object.keys(yields).forEach(k => { if(!sarbAnchors[k]) yields[k]=SAGB_BASE[k]+avgShift; });
+    document.getElementById('bond-badge').textContent='SARB Live';
+    document.getElementById('bond-badge').className='sec-hdr-badge badge-live';
+  // Priority 2: Finnhub RSA10Y parallel-shift fallback
+  } else {
+    try {
+      const q = await apiFetch(`https://finnhub.io/api/v1/quote?symbol=RSA10Y&token=${FINNHUB_KEY}`);
+      if(q && q.c > 0) {
+        const shift = q.c - SAGB_BASE['10Y'];
+        Object.keys(yields).forEach(k => { yields[k] = SAGB_BASE[k] + shift * 0.7; });
+        document.getElementById('bond-badge').textContent = 'Finnhub Adj.';
+        document.getElementById('bond-badge').className = 'sec-hdr-badge badge-live';
+      }
+    } catch(e) {}
+  }
+  window._sarbYields = yields;
+
+  const tenors = Object.keys(yields);
+  const vals = tenors.map(t => yields[t]);
+  const prev = tenors.map(t => SAGB_PREV[t]);
+
+  // Spreads
+  const s2y = yields['2Y'], s10y = yields['10Y'], s30y = yields['30Y'];
+  const p2y = SAGB_PREV['2Y'], p10y = SAGB_PREV['10Y'], p30y = SAGB_PREV['30Y'];
+  const sp_2s10 = s10y - s2y, pp_2s10 = p10y - p2y;
+  const sp_2s30 = s30y - s2y, pp_2s30 = p30y - p2y;
+  const realYield = yields['10Y'] - 3.0; // CPI Feb 2026: 3.0%
+
+  document.getElementById('bond-val').innerHTML = `<div class="card-val">${yields['10Y'].toFixed(2)}%</div><div class="card-sub">R2035 benchmark</div>`;
+  document.getElementById('yc-2s10s').textContent = `${sp_2s10.toFixed(0)}bps`;
+  document.getElementById('yc-2s10s-chg').textContent = `${sp_2s10>pp_2s10?'+':''}${((sp_2s10-pp_2s10)*100).toFixed(0)}bps 1d`;
+  document.getElementById('yc-2s10s-chg').style.color = sp_2s10 > pp_2s10 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('yc-2s30s').textContent = `${sp_2s30.toFixed(0)}bps`;
+  document.getElementById('yc-2s30s-chg').textContent = `${sp_2s30>pp_2s30?'+':''}${((sp_2s30-pp_2s30)*100).toFixed(0)}bps 1d`;
+  document.getElementById('yc-2s30s-chg').style.color = sp_2s30 > pp_2s30 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('yc-real').textContent = `+${realYield.toFixed(2)}%`;
+  document.getElementById('yc-real').style.color = realYield > 2 ? 'var(--green)' : realYield > 0 ? 'var(--amber)' : 'var(--red)';
+
+  if(ycChart) ycChart.destroy();
+  ycChart = new Chart(document.getElementById('yc-chart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: tenors,
+      datasets: [
+        { label:'Today', data:vals, borderColor:'#c8a84b', backgroundColor:'rgba(200,168,75,0.06)', borderWidth:2, tension:0.4, pointRadius:4, pointHoverRadius:6, pointBackgroundColor:'#c8a84b', fill:true },
+        { label:'Prior Day', data:prev, borderColor:'rgba(226,226,226,0.15)', borderWidth:1, borderDash:[4,4], tension:0.4, pointRadius:2, pointBackgroundColor:'rgba(226,226,226,0.15)', fill:false }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins:{ legend:{ display:true, position:'top', align:'end', labels:{boxWidth:16,font:{size:9}} }, tooltip:{mode:'index',intersect:false} },
+      scales:{
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{font:{size:9}} },
+        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{callback:v=>`${v.toFixed(1)}%`,font:{size:9}}, min: Math.min(...vals,...prev)-0.3, max:Math.max(...vals,...prev)+0.3 }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  ZAR IMPLIED VOL SURFACE
+// ══════════════════════════════════════════════════════
+// Indicative implied vol surface: rows=tenors, cols=delta
+// Based on typical USD/ZAR vol market structure (ATM ~14-18%)
+const VOL_TENORS  = ['1W','1M','3M','6M','1Y','2Y'];
+const VOL_DELTAS  = ['10ΔP','25ΔP','ATM','25ΔC','10ΔC'];
+// vol surface in % (annualised) — typical structure with wing skew
+const VOL_DATA = [
+  [21.5, 18.2, 16.8, 17.9, 22.4],
+  [19.8, 17.4, 15.9, 16.8, 20.5],
+  [18.6, 16.5, 14.8, 15.6, 19.1],
+  [17.9, 15.8, 14.2, 15.0, 18.3],
+  [17.4, 15.2, 13.8, 14.5, 17.6],
+  [16.8, 14.7, 13.4, 14.0, 17.0],
+];
+
+function buildVolSurface() {
+  const container = document.getElementById('vol-surface-container');
+  const allVals = VOL_DATA.flat();
+  const minV = Math.min(...allVals), maxV = Math.max(...allVals);
+
+  function volColor(v) {
+    const t = (v - minV) / (maxV - minV);
+    // cool → warm palette
+    const stops = [
+      [26,58,82],[29,100,145],[33,150,196],[245,158,11],[240,78,82],[153,27,27]
+    ];
+    const idx = t * (stops.length-1);
+    const lo = stops[Math.floor(idx)], hi = stops[Math.ceil(idx)] || stops[stops.length-1];
+    const f = idx % 1;
+    const r = ~~(lo[0]+(hi[0]-lo[0])*f);
+    const g = ~~(lo[1]+(hi[1]-lo[1])*f);
+    const b = ~~(lo[2]+(hi[2]-lo[2])*f);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // Header row
+  const cols = VOL_DELTAS.length + 1;
+  let html = `<div style="display:grid;grid-template-columns:42px ${VOL_DELTAS.map(()=>'1fr').join(' ')};gap:2px;margin-bottom:2px;">
+    <div class="vol-axis-label"></div>
+    ${VOL_DELTAS.map(d=>`<div class="vol-axis-label">${d}</div>`).join('')}
+  </div>`;
+
+  // Data rows
+  html += `<div style="display:grid;grid-template-columns:42px ${VOL_DELTAS.map(()=>'1fr').join(' ')};gap:2px;">`;
+  VOL_TENORS.forEach((tenor, ri) => {
+    html += `<div class="vol-axis-label" style="display:flex;align-items:center;justify-content:flex-end;padding-right:4px;">${tenor}</div>`;
+    VOL_DATA[ri].forEach((v, ci) => {
+      const bg = volColor(v);
+      const textCol = v > (minV+maxV)/2+2 ? '#fff' : '#fff';
+      html += `<div class="vol-cell" style="background:${bg};color:${textCol};" title="Tenor: ${tenor} | ${VOL_DELTAS[ci]} | IV: ${v.toFixed(1)}%">${v.toFixed(1)}</div>`;
+    });
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+//  CDS SPREADS
+// ══════════════════════════════════════════════════════
+const CDS_DATA = [
+  { country:'South Africa', tenor:'5Y', spread:218, prev:222, maxSpread:280 },
+  { country:'Brazil',       tenor:'5Y', spread:185, prev:178, maxSpread:280 },
+  { country:'Turkey',       tenor:'5Y', spread:295, prev:302, maxSpread:280 },
+  { country:'Nigeria',      tenor:'5Y', spread:520, prev:515, maxSpread:280 },
+  { country:'Egypt',        tenor:'5Y', spread:682, prev:670, maxSpread:280 },
+  { country:'Kenya',        tenor:'5Y', spread:465, prev:472, maxSpread:280 },
+  { country:'Mexico',       tenor:'5Y', spread:155, prev:152, maxSpread:280 },
+  { country:'Indonesia',    tenor:'5Y', spread:98,  prev:100, maxSpread:280 },
+];
+
+function buildCDS() {
+  const tbody = document.getElementById('cds-tbody');
+  const maxS = Math.max(...CDS_DATA.map(d=>d.spread));
+  tbody.innerHTML = CDS_DATA.map(d => {
+    const chg = d.spread - d.prev;
+    const dClass = chg > 0 ? 'down-text' : 'up-text'; // widening = worse
+    const barW = Math.round((d.spread/maxS)*100);
+    const isSA = d.country === 'South Africa';
+    return `<tr ${isSA ? 'style="background:rgba(200,168,75,0.06);"' : ''}>
+      <td class="cds-country" style="${isSA?'color:var(--gold);':''}">${d.country}</td>
+      <td class="cds-spread" style="${isSA?'color:var(--gold);':''}">${d.spread}</td>
+      <td class="cds-chg ${dClass}">${chg>=0?'+':''}${chg}bps</td>
+      <td class="cds-bar-wrap"><div class="cds-bar" style="width:${barW}%;background:${isSA?'var(--gold)':'rgba(255,255,255,0.15)'};"></div></td>
+    </tr>`;
+  }).join('');
+
+  if(cdsChart) cdsChart.destroy();
+  cdsChart = new Chart(document.getElementById('cds-chart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: CDS_DATA.map(d=>d.country.split(' ')[0]),
+      datasets: [{
+        data: CDS_DATA.map(d=>d.spread),
+        backgroundColor: CDS_DATA.map(d=>d.country==='South Africa'?'rgba(200,168,75,0.7)':'rgba(91,141,238,0.35)'),
+        borderColor:     CDS_DATA.map(d=>d.country==='South Africa'?'rgba(200,168,75,1)':'rgba(91,141,238,0.6)'),
+        borderWidth:1, borderRadius:2
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      scales:{ x:{grid:{display:false},ticks:{font:{size:8}}}, y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'bps',font:{size:8}}} },
+      plugins:{ tooltip:{ callbacks:{ label:ctx=>`${ctx.parsed.y}bps` }}}
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  TERMS OF TRADE
+// ══════════════════════════════════════════════════════
+const TOT_MONTHS = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'];
+const TOT_SERIES = [112,115,118,113,108,114,119,122,117,115,118,121]; // SA ToT index
+const TOT_EM_AVG = [105,107,109,106,103,108,110,112,109,107,109,111]; // EM avg for comparison
+
+async function buildToT(fxRates) {
+  // Derive a simple ToT: weight gold 35%, platinum 20%, coal 15%, iron ore 15%, other 15%
+  // vs import basket: oil 45%, machinery 30%, food 15%, other 10%
+  let exportIdx = 121, importIdx = 108;
+  if(fxRates) {
+    // Adjust using live commodity prices if available from window scope
+    const brent = window._liveCommodities?.brent || 83;
+    const gold  = window._liveCommodities?.gold  || 2050;
+    const plat  = window._liveCommodities?.plat  || 960;
+    exportIdx = Math.round(100 * (gold/1800*0.35 + plat/900*0.20 + 1.05*0.15 + 0.98*0.15 + 1.0*0.15));
+    importIdx = Math.round(100 * (brent/80*0.45 + 1.08*0.30 + 1.06*0.15 + 1.0*0.10));
+  }
+  const totRatio = (exportIdx/importIdx*100).toFixed(1);
+  document.getElementById('tot-exp').textContent = exportIdx;
+  document.getElementById('tot-imp').textContent = importIdx;
+  document.getElementById('tot-ratio').textContent = totRatio;
+  document.getElementById('tot-ratio').className = `tot-comp-val ${parseFloat(totRatio)>=100?'up-text':'down-text'}`;
+
+  if(totChart) totChart.destroy();
+  totChart = new Chart(document.getElementById('tot-chart').getContext('2d'), {
+    type:'line',
+    data:{
+      labels: TOT_MONTHS,
+      datasets:[
+        {label:'SA ToT',   data:TOT_SERIES, borderColor:'#c8a84b', backgroundColor:'rgba(200,168,75,0.08)', borderWidth:2, tension:0.4, fill:true, pointRadius:3},
+        {label:'EM Avg',   data:TOT_EM_AVG, borderColor:'rgba(91,141,238,0.5)', borderWidth:1, borderDash:[4,3], tension:0.4, fill:false, pointRadius:2},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{legend:{display:true,position:'top',align:'end',labels:{boxWidth:12,font:{size:8}}}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:8}}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:8}},min:95,max:130}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  PMI COMPOSITE
+// ══════════════════════════════════════════════════════
+const PMI_DATA = [
+  { country:'SA',      val:47.4, prev:48.7,  label:'Absa PMI' },
+  { country:'China',   val:49.0, prev:49.3,  label:'NBS Mfg' },
+  { country:'Global',  val:50.6, prev:50.2,  label:'JPM Global' },
+  { country:'US',      val:52.4, prev:50.9,  label:'ISM Mfg' },
+  { country:'Euro',    val:50.8, prev:47.6,  label:'HCOB Mfg' },
+  { country:'EM',      val:51.2, prev:50.8,  label:'EM Composite' },
+];
+const PMI_HISTORY = {
+  // Jul 25 → Mar 26 — 9 months rolling
+  SA:     [48.2, 47.9, 48.1, 48.4, 48.6, 48.9, 48.7, 48.7, 47.4],
+  China:  [49.4, 49.1, 49.8, 50.1, 50.3, 50.1, 49.7, 49.3, 49.0],
+  Global: [49.9, 50.1, 50.3, 50.5, 50.4, 50.3, 50.4, 50.2, 50.6],
+};
+const PMI_MONTHS_SHORT = ['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+
+function buildPMI() {
+  const grid = document.getElementById('pmi-grid');
+  grid.innerHTML = PMI_DATA.map(p => {
+    const cls = p.val>50 ? 'expand' : p.val<49.5 ? 'contract' : 'neutral';
+    const arrow_ = p.val>p.prev ? '↑' : p.val<p.prev ? '↓' : '↔';
+    return `<div class="pmi-item">
+      <div class="pmi-country">${p.country}</div>
+      <div class="pmi-val ${cls}">${p.val.toFixed(1)}</div>
+      <div class="pmi-label">${arrow_} ${p.label}</div>
+    </div>`;
+  }).join('');
+
+  if(pmiChart) pmiChart.destroy();
+  pmiChart = new Chart(document.getElementById('pmi-chart').getContext('2d'), {
+    type:'line',
+    data:{
+      labels: PMI_MONTHS_SHORT,
+      datasets:[
+        {label:'SA',     data:PMI_HISTORY.SA,    borderColor:'#c8a84b', borderWidth:2, tension:0.4, pointRadius:2, fill:false},
+        {label:'China',  data:PMI_HISTORY.China,  borderColor:'#f04e52', borderWidth:1.5, tension:0.4, pointRadius:2, fill:false},
+        {label:'Global', data:PMI_HISTORY.Global, borderColor:'rgba(91,141,238,0.7)', borderWidth:1.5, tension:0.4, pointRadius:2, fill:false},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      plugins:{
+        legend:{display:true,position:'top',align:'end',labels:{boxWidth:12,font:{size:8}}},
+        annotation:{}
+      },
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:8}}},
+        y:{
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{font:{size:8}}, min:46, max:54,
+          // Draw 50 reference line
+        }
+      }
+    },
+    plugins:[{
+      id:'refLine',
+      afterDraw(chart) {
+        const {ctx,scales:{y,x}} = chart;
+        const y50 = y.getPixelForValue(50);
+        ctx.save();
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4,4]);
+        ctx.moveTo(x.left, y50);
+        ctx.lineTo(x.right, y50);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  COMMODITY / ZAR CORRELATION HEATMAP (Chart.js bar as proxy)
+// ══════════════════════════════════════════════════════
+const CORR_LABELS = ['Gold','Platinum','Brent','Iron Ore','Coal','Copper','Palladium'];
+const CORR_VALS   = [-0.72, -0.65, -0.58, -0.61, -0.44, -0.68, -0.59]; // negative = commodity up → ZAR strengthens
+
+function buildCorrChart() {
+  if(corrChart) corrChart.destroy();
+  corrChart = new Chart(document.getElementById('corr-chart').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: CORR_LABELS,
+      datasets:[{
+        label:'6M Rolling Correlation',
+        data: CORR_VALS,
+        backgroundColor: CORR_VALS.map(v => v < -0.6 ? 'rgba(45,217,122,0.55)' : v < -0.4 ? 'rgba(45,217,122,0.30)' : 'rgba(245,158,11,0.4)'),
+        borderColor:     CORR_VALS.map(v => v < -0.6 ? 'rgba(45,217,122,0.9)'  : v < -0.4 ? 'rgba(45,217,122,0.6)'  : 'rgba(245,158,11,0.8)'),
+        borderWidth:1, borderRadius:2,
+        indexAxis:'y'
+      }]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>`r = ${ctx.parsed.x.toFixed(2)}`}}},
+      scales:{
+        x:{
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{callback:v=>v.toFixed(1),font:{size:8}},
+          min:-1, max:0,
+          title:{display:true,text:'Correlation (commodity vs USD/ZAR)',font:{size:8},color:'rgba(226,226,226,0.35)'}
+        },
+        y:{grid:{display:false},ticks:{font:{size:9}}}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  MACRO REGIME CLASSIFIER
+// ══════════════════════════════════════════════════════
+/*
+  Five regimes:
+  1. Risk-On Commodity Boom     — ZAR strong, commodities ↑, yield curve normal, EM flows +
+  2. Stagflation Stress         — CPI high, growth weak, yields rising across curve, ZAR weak
+  3. External Shock / EM Rout   — EM sell-off, CDS widening, ZAR depreciation, risk-off
+  4. Domestic Fiscal Stress     — SA-specific: CDS widening vs peers, bond spread widening, load shedding ↑
+  5. Goldilocks / Soft Landing  — Inflation cooling, growth OK, curves normalizing, ZAR stable
+*/
+const REGIMES = {
+  'RISK_ON':    { name:'Risk-On · Commodity Boom', color:'#2dd97a', desc:'ZAR supported by commodity tailwinds; EM flows positive; yield curve normalizing. Constructive on ZAR assets; commodity exporters outperforming.' },
+  'STAGFLATION':{ name:'Stagflation Stress',        color:'#f04e52', desc:'Elevated inflation with weak domestic growth; yields rising across curve; real income squeeze. SARB in restrictive mode; fiscal consolidation challenged.' },
+  'EM_ROUT':    { name:'EM Risk-Off / External Shock', color:'#ef4444', desc:'Global risk-off driving EM capital outflows; ZAR depreciation pressure; CDS spreads widening across peer group. Defensive positioning indicated.' },
+  'FISCAL_DOM': { name:'Domestic Fiscal Stress',    color:'#f59e0b', desc:'SA-idiosyncratic stress: fiscal slippage, SOE risk, CDS widening vs EM peers; bond yields disconnecting from EM beta. Monitor NT Budget outlook.' },
+  'GOLDILOCKS': { name:'Goldilocks · Soft Landing', color:'#5b8dee', desc:'Disinflation path intact; SARB cutting cycle potential; ZAR broadly stable; commodity prices consolidating. Selective long duration attractive.' },
+};
+
+// Signal dimensions: each returns a score in [-1, +1] where +1 = risk-on/positive
+function computeRegimeSignals(data) {
+  const signals = {};
+
+  // 1. FX Momentum: ZAR vs 20d MA proxy — negative ZAR change = risk-off
+  const zarChg = data.zarChgPct || 0; // % ZAR change today
+  signals['FX Momentum'] = Math.max(-1, Math.min(1, -zarChg / 3)); // invert: ZAR strengthen = positive
+
+  // 2. Yield Curve Shape: 2s10s steepness (positive = normal, negative = inverted = recession)
+  const spread2s10 = data.spread2s10 || 185; // bps
+  signals['Yield Curve'] = spread2s10 > 200 ? 0.6 : spread2s10 > 150 ? 0.3 : spread2s10 > 100 ? 0 : -0.5;
+
+  // 3. Commodity Complex (export basket direction)
+  const commChg = data.commChgPct || 0;
+  signals['Commodity Complex'] = Math.max(-1, Math.min(1, commChg / 2.5));
+
+  // 4. CDS Spread Level (SA 5Y): >250bps = stress
+  const cdsSA = data.cdsSA || 218;
+  signals['CDS / Credit'] = cdsSA < 180 ? 0.7 : cdsSA < 220 ? 0.2 : cdsSA < 280 ? -0.3 : -0.8;
+
+  // 5. PMI Momentum (SA manufacturing)
+  const pmi = data.pmiSA || 47.4;
+  signals['PMI / Growth'] = pmi > 51 ? 0.6 : pmi > 50 ? 0.2 : pmi > 48.5 ? -0.2 : -0.6;
+
+  // 6. Load Shedding Proxy (energy constraint)
+  const lsStage = data.lsStage || 0;
+  signals['Energy Constraint'] = lsStage === 0 ? 0.5 : lsStage <= 2 ? 0 : lsStage <= 4 ? -0.5 : -1;
+
+  return signals;
+}
+
+function classifyRegime(signals) {
+  const avg = Object.values(signals).reduce((a,b)=>a+b,0) / Object.keys(signals).length;
+  const fx   = signals['FX Momentum'];
+  const comm = signals['Commodity Complex'];
+  const cds  = signals['CDS / Credit'];
+  const yc   = signals['Yield Curve'];
+  const pmi  = signals['PMI / Growth'];
+  const ls   = signals['Energy Constraint'];
+
+  // Scores for each regime
+  const scores = {
+    'RISK_ON':     (fx>0.3?1:0)+(comm>0.3?1:0)+(cds>0?1:0)+(pmi>0?0.5:0),
+    'STAGFLATION': (fx<-0.2?1:0)+(pmi<-0.2?1:0)+(yc<0.3?0.5:0),
+    'EM_ROUT':     (cds<-0.3?1.5:0)+(fx<-0.3?1:0)+(comm<-0.2?0.5:0),
+    'FISCAL_DOM':  (cds<-0.2?1:0)+(ls<-0.3?1:0)+(yc<0.3?0.5:0),
+    'GOLDILOCKS':  (pmi>0?0.5:0)+(cds>0?0.5:0)+(yc>0.3?0.5:0)+(fx>-0.1?0.3:0),
+  };
+  const maxK = Object.keys(scores).reduce((a,b)=>scores[a]>scores[b]?a:b);
+  const total = Object.values(scores).reduce((a,b)=>a+b,0)||1;
+  const confidence = {};
+  Object.keys(scores).forEach(k=>{ confidence[k]=Math.round(scores[k]/total*100); });
+  return { regime:maxK, scores, confidence };
+}
+
+function renderRegime(signals, regime, confidence) {
+  const R = REGIMES[regime];
+  const pill = document.getElementById('regime-pill');
+  pill.style.color = R.color;
+  pill.style.borderColor = R.color+'55';
+  pill.style.background = R.color+'0d';
+  document.getElementById('regime-name').textContent = R.name;
+  document.getElementById('regime-desc').textContent = R.desc;
+
+  // Confidence bars
+  const dims = Object.keys(signals);
+  const bars = document.getElementById('conf-bars');
+  bars.innerHTML = dims.map(dim => {
+    const v = (signals[dim]+1)/2*100; // map [-1,1] → [0,100]
+    const col = signals[dim] > 0.2 ? 'var(--green)' : signals[dim] < -0.2 ? 'var(--red)' : 'var(--amber)';
+    return `<div class="conf-bar-row">
+      <span class="conf-bar-name">${dim}</span>
+      <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${v.toFixed(0)}%;background:${col};"></div></div>
+      <span class="conf-pct" style="color:${col};">${v.toFixed(0)}%</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  FX & TICKER
+// ══════════════════════════════════════════════════════
+async function buildTicker() {
+  const inner = document.getElementById('ticker-inner');
+  let items = [
+    {id:'USD/ZAR',  lbl:'USD/ZAR',        val:'—', chg:0, dp:4},
+    {id:'EUR/ZAR',  lbl:'EUR/ZAR',        val:'—', chg:0, dp:4},
+    {id:'GBP/ZAR',  lbl:'GBP/ZAR',        val:'—', chg:0, dp:4},
+    {id:'BRENT',    lbl:'Brent ($/bbl)',   val:'—', chg:0, dp:2, pfx:'$'},
+    {id:'GOLD',     lbl:'Gold (XAU/USD)',  val:'—', chg:0, dp:0, pfx:'$'},
+    {id:'PLAT',     lbl:'Platinum',        val:'—', chg:0, dp:0, pfx:'$'},
+    {id:'PALL',     lbl:'Palladium',       val:'—', chg:0, dp:0, pfx:'$'},
+    {id:'EZA',      lbl:'JSE Top40 (EZA)', val:'—', chg:0, dp:2, pfx:'$'},
+  ];
+
+  function render() {
+    inner.innerHTML = items.map(it => {
+      const d = dir(it.chg), col = dirColor(d);
+      return `<div class="tick ${d}">
+        <span class="tick-lbl">${it.lbl}</span>
+        <span class="tick-val">${it.val}</span>
+        <span class="tick-chg">${arrow(it.chg)} ${it.chg!==0?pct(it.chg):'—'}</span>
+      </div>`;
+    }).join('');
+  }
+  render();
+
+  const YAHOO_FX = {
+    'USD/ZAR': 'USDZAR=X',
+    'EUR/ZAR': 'EURZAR=X',
+    'GBP/ZAR': 'GBPZAR=X',
+  };
+
+  const [fxUSD, fxEUR, fxGBP, brentRes, goldRes, platRes, pallRes, ezaRes] = await Promise.allSettled([
+    fetchViaProxy(`https://query1.finance.yahoo.com/v8/finance/chart/USDZAR=X`),
+    fetchViaProxy(`https://query1.finance.yahoo.com/v8/finance/chart/EURZAR=X`),
+    fetchViaProxy(`https://query1.finance.yahoo.com/v8/finance/chart/GBPZAR=X`),
+    apiFetch(`https://finnhub.io/api/v1/quote?symbol=USOIL&token=${FINNHUB_KEY}`),
+    apiFetch(`https://finnhub.io/api/v1/quote?symbol=XAUUSD&token=${FINNHUB_KEY}`),
+    apiFetch(`https://finnhub.io/api/v1/quote?symbol=XPTUSD&token=${FINNHUB_KEY}`),
+    apiFetch(`https://finnhub.io/api/v1/quote?symbol=XPDUSD&token=${FINNHUB_KEY}`),
+    apiFetch(`https://finnhub.io/api/v1/quote?symbol=EZA&token=${FINNHUB_KEY}`),
+  ]);
+
+  let zarChgPct = 0;
+
+  // Parse each FX pair from Yahoo chart response
+  [[fxUSD, 0], [fxEUR, 1], [fxGBP, 2]].forEach(([res, idx]) => {
+    if (res.status === 'fulfilled') {
+      const meta = res.value?.chart?.result?.[0]?.meta;
+      if (meta) {
+        const price = meta.regularMarketPrice;
+        const prev  = meta.previousClose || meta.chartPreviousClose || price;
+        const chg   = prev ? (price - prev) / prev * 100 : 0;
+        items[idx].val = price.toFixed(4);
+        items[idx].chg = chg;
+        if (idx === 0) {
+          window._zarSpot = price;
+          zarChgPct = chg;
+        }
+        updateDataDictEntry(['usd-zar','eur-zar','gbp-zar'][idx], { status:'live', fetched: new Date().toISOString() });
+      }
+    }
+  });
+
+  const fxRes = fxUSD; // alias for compat
+
+  const commMap = [
+    {idx:3, res:brentRes, key:'brent'},
+    {idx:4, res:goldRes,  key:'gold'},
+    {idx:5, res:platRes,  key:'plat'},
+    {idx:6, res:pallRes,  key:'pall'},
+    {idx:7, res:ezaRes,   key:null},
+  ];
+  window._liveCommodities = {};
+  commMap.forEach(({idx,res,key}) => {
+    if(res.status==='fulfilled') {
+      const q=res.value;
+      const chgPct = q.o ? (q.c-q.o)/q.o*100 : 0;
+      const pfx = items[idx].pfx||'';
+      items[idx].val = pfx+(items[idx].dp===0?Math.round(q.c).toLocaleString():q.c.toFixed(items[idx].dp));
+      items[idx].chg = chgPct;
+      if(key) {
+        window._liveCommodities[key] = q.c;
+        // Update commodity list
+        if(key==='brent') { document.getElementById('c-brent').textContent=`$${q.c.toFixed(2)}`; const d=dir(chgPct); document.getElementById('c-brent-chg').textContent=`${arrow(chgPct)} ${pct(chgPct)}`; document.getElementById('c-brent-chg').className=`china-trend ${d}-text`; }
+        if(key==='gold')  { document.getElementById('c-gold').textContent=`$${Math.round(q.c).toLocaleString()}`; const d=dir(chgPct); document.getElementById('c-gold-chg').textContent=`${arrow(chgPct)} ${pct(chgPct)}`; document.getElementById('c-gold-chg').className=`china-trend ${d}-text`; }
+        if(key==='plat')  { document.getElementById('c-plat').textContent=`$${Math.round(q.c).toLocaleString()}`; const d=dir(chgPct); document.getElementById('c-plat-chg').textContent=`${arrow(chgPct)} ${pct(chgPct)}`; document.getElementById('c-plat-chg').className=`china-trend ${d}-text`; }
+        if(key==='pall')  { document.getElementById('c-pall').textContent=`$${Math.round(q.c).toLocaleString()}`; const d=dir(chgPct); document.getElementById('c-pall-chg').textContent=`${arrow(chgPct)} ${pct(chgPct)}`; document.getElementById('c-pall-chg').className=`china-trend ${d}-text`; }
+      }
+    }
+  });
+
+  render();
+
+  // Compute avg commodity change for regime
+  const commChgPct = commMap.slice(0,4).filter(c=>c.res.status==='fulfilled')
+    .reduce((a,c)=>{ const q=c.res.value; return a+(q.o?(q.c-q.o)/q.o*100:0); },0) / 4;
+
+  // Run regime classifier
+  const signals = computeRegimeSignals({
+    zarChgPct: zarChgPct,
+    spread2s10: 185,
+    commChgPct: commChgPct,
+    cdsSA: 218,
+    pmiSA: 47.4,
+    lsStage: window._lsStage || 0,
+  });
+  const {regime, confidence} = classifyRegime(signals);
+  renderRegime(signals, regime, confidence);
+
+  return { commChgPct };
+}
+
+// ══════════════════════════════════════════════════════
+//  LOAD SHEDDING
+// ══════════════════════════════════════════════════════
+async function fetchLS() {
+  const lsVal = document.getElementById('ls-val');
+  try {
+    const d = await apiFetch('https://developer.sepush.co.za/business/2.0/status', { headers:{'token':ESP_KEY} });
+    const stage = parseInt(d?.status?.capetown?.stage || d?.status?.national?.stage || '0', 10) || 0;
+    window._lsStage = stage;
+    const cls = stage===0?'ls-0':stage<=2?'ls-low':stage<=4?'ls-mid':'ls-hi';
+    const label = stage===0?'No Load Shedding':`Stage ${stage}`;
+    const impactText = stage===0?'Grid stable':stage<=2?'Moderate constraint':stage<=4?'Significant GDP drag':'Severe economic risk';
+    lsVal.innerHTML = `<div class="ls-stage ${cls}">${stage}</div><div style="font-size:11px;color:var(--text2);margin-top:6px;">${label}</div><div style="font-size:9px;color:var(--text3);margin-top:2px;">${impactText}</div>`;
+    document.getElementById('ls-badge').textContent='Live';
+    document.getElementById('ls-badge').className='sec-hdr-badge badge-live';
+  } catch(e) {
+    window._lsStage = 0;
+    lsVal.innerHTML = `<div class="err">ESP unavailable</div>`;
+    document.getElementById('ls-badge').textContent='Unavailable';
+    document.getElementById('ls-badge').className='sec-hdr-badge badge-warn';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  JSE EQUITIES
+// ══════════════════════════════════════════════════════
+const JSE_TICKERS = ['NPN.JO','PRX.AS','SBK.JO','FSR.JO','SOL.JO','AGL.L','MTN.JO'];
+
+async function fetchYahoo(ticker) {
+  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}`;
+  const d = await fetchViaProxy(targetUrl);
+  const res = d?.chart?.result?.[0];
+  if(!res) throw new Error('no result');
+  return {
+    name: res.meta.shortName || ticker,
+    price: res.meta.regularMarketPrice,
+    prevClose: res.meta.previousClose || res.meta.chartPreviousClose,
+    currency: res.meta.currency || ''
+  };
+}
+async function fetchConsensus(ticker) {
+  const sym = ticker.replace(/\.(JO|AS|L)$/,'');
+  try {
+    const d = await apiFetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${sym}&token=${FINNHUB_KEY}`);
+    if(!d||!d.length) return null;
+    return {buy:d[0].buy||0,hold:d[0].hold||0,sell:d[0].sell||0};
+  } catch(e){return null;}
+}
+async function fetchStockNews(name) {
+  const q = encodeURIComponent(name.split(' ').slice(0,2).join(' '));
+  try {
+    const d = await apiFetch(`https://newsapi.org/v2/everything?q=${q}&sortBy=publishedAt&pageSize=3&language=en&apiKey=${NEWSAPI_KEY}`);
+    return d?.articles?.slice(0,3)||[];
+  } catch(e){return [];}
+}
+
+async function buildEqCard(ticker) {
+  const [qRes, cRes, nRes] = await Promise.allSettled([
+    fetchYahoo(ticker),
+    fetchConsensus(ticker),
+    fetchStockNews(ticker.replace(/\.(JO|AS|L)$/,''))
+  ]);
+  if(qRes.status==='rejected') return `<div class="eq-card"><div class="eq-name">${ticker}</div><div class="err">Data unavailable</div></div>`;
+  const q = qRes.value;
+  const chg = q.prevClose ? (q.price-q.prevClose)/q.prevClose*100 : 0;
+  const d = dir(chg);
+  const c = cRes.status==='fulfilled'?cRes.value:null;
+  const ns = nRes.status==='fulfilled'?nRes.value:[];
+  const priceStr = q.price >= 1000 ? q.price.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}) : q.price.toFixed(2);
+  return `<div class="eq-card ${d}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div><div class="eq-name">${q.name}</div><div class="eq-ticker">${ticker}</div></div>
+      <div style="text-align:right;">
+        <div class="eq-price ${d}">${arrow(chg)} ${priceStr} <span style="font-size:9px;">${q.currency}</span></div>
+        <div class="eq-pct ${d}-text">${pct(chg)}</div>
+        <div class="eq-prev">prev: ${q.prevClose?q.prevClose.toFixed(2):'—'}</div>
+      </div>
+    </div>
+    <div class="eq-divider"></div>
+    <div style="font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">Consensus</div>
+    <div class="eq-consensus">${c?`${c.buy} Buy · ${c.hold} Hold · ${c.sell} Sell`:'No consensus data'}</div>
+    <div class="eq-divider"></div>
+    <div style="font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:2px;">Recent News</div>
+    ${ns.length?ns.map(a=>`<div class="eq-news-item"><a href="${a.url}" target="_blank" rel="noopener">${a.title}</a></div>`).join(''):'<div style="font-size:9px;color:var(--text3);">No recent coverage</div>'}
+  </div>`;
+}
+
+async function fetchEquities() {
+  const grid = document.getElementById('equities-grid');
+  const results = await Promise.allSettled(JSE_TICKERS.map(t=>buildEqCard(t)));
+  grid.innerHTML = results.map(r=>r.status==='fulfilled'?r.value:`<div class="eq-card"><div class="err">Card failed</div></div>`).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  NEWS FEED
+// ══════════════════════════════════════════════════════
+const NEWS_Q = [
+  {q:'South Africa economy',         tag:'Macro'},
+  {q:'SARB interest rate',           tag:'Monetary Policy'},
+  {q:'JSE market equities',          tag:'Markets'},
+  {q:'South Africa sovereign debt',  tag:'Sovereign'},
+  {q:'emerging markets Africa',      tag:'EM Watch'},
+  {q:'China commodities demand',     tag:'China'},
+  {q:'South Africa rand currency',   tag:'FX'},
+];
+
+async function fetchNews() {
+  const feed = document.getElementById('news-feed');
+  try {
+    const results = await Promise.allSettled(NEWS_Q.map(({q})=>
+      apiFetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(q)}&sortBy=publishedAt&pageSize=5&language=en&apiKey=${NEWSAPI_KEY}`)
+    ));
+    let all = [];
+    results.forEach((r,i)=>{
+      if(r.status==='fulfilled'&&r.value?.articles) {
+        r.value.articles.forEach(a=>all.push({...a,_tag:NEWS_Q[i].tag}));
+      }
+    });
+    const seen = new Set();
+    all = all.filter(a=>{ if(!a.title||seen.has(a.title))return false; seen.add(a.title); return true; });
+    all.sort((a,b)=>new Date(b.publishedAt)-new Date(a.publishedAt));
+    all = all.slice(0,14);
+
+    if(!all.length) { feed.innerHTML=`<div class="err">No news fetched — check NewsAPI key</div>`; return; }
+
+    const mid = Math.ceil(all.length/2);
+    const makeItem = a => `<div class="news-item">
+      <div>
+        <div class="news-hl"><a href="${a.url}" target="_blank" rel="noopener">${a.title}</a></div>
+        <div class="news-meta"><span>${a.source?.name||'Unknown'}</span><span>·</span><span>${timeAgo(a.publishedAt)}</span></div>
+      </div>
+      <span class="news-tag">${a._tag}</span>
+    </div>`;
+    feed.innerHTML = `
+      <div class="news-grid">
+        <div class="news-col">${all.slice(0,mid).map(makeItem).join('')}</div>
+        <div class="news-col">${all.slice(mid).map(makeItem).join('')}</div>
+      </div>`;
+  } catch(e) {
+    feed.innerHTML = `<div class="err">News feed error: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  FREIGHT INDICATORS — static with source attribution
+// ══════════════════════════════════════════════════════
+function fetchFreight() {
+  document.getElementById('bdi-val').textContent = '2,038';
+  document.getElementById('bdi-chg').textContent = '+37.5% MoM';
+  document.getElementById('bdi-chg').className = 'freight-chg up-text';
+  document.getElementById('scfi-val').textContent = '1,710';
+  document.getElementById('scfi-chg').textContent = '↑ Middle East rerouting';
+  document.getElementById('scfi-chg').className = 'freight-chg up-text';
+}
+
+// ══════════════════════════════════════════════════════
+//  SARB SCRAPE — repo rate + benchmark SAGB yields
+//  Source: resbank.co.za selected descriptive statistics
+//  Via: corsproxy.io to bypass CORS
+// ══════════════════════════════════════════════════════
+const SARB_STATS_URL = 'https://www.resbank.co.za/en/home/what-we-do/statistics/rates/selected-descriptive-statistics';
+
+async function fetchSARBData() {
+  const statusEl = document.getElementById('sarb-scrape-status');
+  try {
+    // Try each proxy for the SARB HTML page
+    let html = null;
+    for (const proxyFn of CORS_PROXIES) {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 10000);
+        const r = await fetch(proxyFn(SARB_STATS_URL), { signal: ctrl.signal });
+        clearTimeout(t);
+        if (r.ok) { html = await r.text(); break; }
+      } catch(e) { continue; }
+    }
+    if (!html) throw new Error('all proxies failed for SARB page');
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Parse all tables looking for yield / rate data
+    const tables = doc.querySelectorAll('table');
+    let repoFound = null, yieldsFound = {};
+
+    tables.forEach(table => {
+      const rows = table.querySelectorAll('tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td, th');
+        if (cells.length < 2) return;
+        const label = cells[0].textContent.trim().toUpperCase();
+        const valRaw = cells[cells.length - 1].textContent.trim().replace(/[^0-9.]/g, '');
+        const val = parseFloat(valRaw);
+        if (isNaN(val) || val <= 0 || val > 30) return;
+
+        // Repo rate
+        if (label.includes('REPO') || label.includes('REPURCHASE')) {
+          repoFound = val;
+        }
+        // Bond yields — match known bond codes
+        Object.keys(SARB_YIELD_LABELS).forEach(code => {
+          if (label.includes(code)) {
+            const tenor = SARB_YIELD_LABELS[code];
+            if (!yieldsFound[tenor] || val > 5) { // prefer higher/more recent value
+              yieldsFound[tenor] = val;
+            }
+          }
+        });
+      });
+    });
+
+    // Update repo rate card if found
+    if (repoFound) {
+      const repoCard = document.querySelector('#repo-val');
+      if (repoCard) {
+        repoCard.innerHTML = `<div class="card-val">${repoFound.toFixed(2)}%</div>
+          <div class="card-sub">Real rate: +${(repoFound - 3.0).toFixed(2)}% vs CPI 3.0%</div>`;
+      }
+      window._liveRepoRate = repoFound;
+      updateDataDictEntry('repo-rate', { status: 'live', fetched: new Date().toISOString() });
+    }
+
+    // Update yield curve if we got enough anchors
+    const anchorCount = Object.keys(yieldsFound).length;
+    if (anchorCount >= 2) {
+      window._sarbYields = yieldsFound;
+      updateDataDictEntry('sagb-curve', { status: 'live', anchors: anchorCount, fetched: new Date().toISOString() });
+      if (statusEl) statusEl.textContent = `SARB: ${anchorCount} yield anchors live`;
+      return { repoFound, yieldsFound };
+    }
+
+    throw new Error(`Only ${anchorCount} yields parsed — falling back`);
+
+  } catch(e) {
+    updateDataDictEntry('repo-rate', { status: 'scrape-failed', error: e.message });
+    updateDataDictEntry('sagb-curve', { status: 'scrape-failed', error: e.message });
+    if (statusEl) statusEl.textContent = `SARB scrape failed: ${e.message}`;
+    console.warn('SARB scrape failed:', e.message);
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  WORLD BANK API — macro fundamentals
+//  Free, no key required. Returns annual series.
+//  Base URL: https://api.worldbank.org/v2/country/ZA/indicator/
+// ══════════════════════════════════════════════════════
+const WB_INDICATORS = {
+  'NY.GDP.MKTP.KD.ZG': { id: 'wb-gdp',     label: 'GDP Growth (%)',          card: 'gdp-val',    suffix: '%',   dp: 1 },
+  'BN.CAB.XOKA.GD.ZS': { id: 'wb-ca',      label: 'Current Account (% GDP)', card: 'ca-val',     suffix: '%',   dp: 1 },
+  'GC.DOD.TOTL.GD.ZS': { id: 'wb-debt',    label: 'Debt/GDP (%)',             card: 'debt-val',   suffix: '%',   dp: 1 },
+  'FI.RES.TOTL.CD':    { id: 'wb-res',      label: 'Gross Reserves (USD)',     card: 'res-val',    suffix: '',    dp: 0, isBn: true },
+  'FP.CPI.TOTL.ZG':    { id: 'wb-cpi',      label: 'CPI Inflation (%)',        card: null,         suffix: '%',   dp: 1 },
+};
+
+async function fetchWorldBank() {
+  const fetches = Object.entries(WB_INDICATORS).map(async ([code, meta]) => {
+    try {
+      const url = `https://api.worldbank.org/v2/country/ZA/indicator/${code}?format=json&mrv=3&per_page=3`;
+      const data = await apiFetch(url);
+      // Response is [metadata, [datapoints]]
+      const points = data?.[1];
+      if (!points || !points.length) throw new Error('no data');
+      // Find most recent non-null value
+      const latest = points.find(p => p.value !== null);
+      if (!latest) throw new Error('all null');
+      return { code, meta, value: latest.value, year: latest.date };
+    } catch(e) {
+      return { code, meta, value: null, year: null, error: e.message };
+    }
+  });
+
+  const results = await Promise.allSettled(fetches);
+  const now = new Date().toISOString();
+
+  results.forEach(r => {
+    if (r.status !== 'fulfilled') return;
+    const { code, meta, value, year, error } = r.value;
+    if (value === null) {
+      updateDataDictEntry(meta.id, { status: 'wb-no-data', error });
+      return;
+    }
+
+    // Format value
+    let display;
+    if (meta.isBn) {
+      display = `$${(value / 1e9).toFixed(1)}bn`;
+    } else {
+      display = `${value >= 0 ? '' : ''}${value.toFixed(meta.dp)}${meta.suffix}`;
+    }
+
+    // Update the relevant card element if mapped
+    if (meta.card) {
+      const el = document.getElementById(meta.card);
+      if (el) {
+        const color = meta.card === 'gdp-val'
+          ? (value > 1 ? 'var(--green)' : value < 0 ? 'var(--red)' : 'var(--amber)')
+          : 'var(--text)';
+        el.innerHTML = `<div class="card-val" style="color:${color}">${display}</div>
+          <div class="card-sub" style="color:var(--text3);font-size:9px;">World Bank · ${year} (latest available)</div>`;
+        el.style.display = '';
+        // Flip badge
+        const badgeId = meta.card.replace('-val','-badge');
+        const badge = document.getElementById(badgeId);
+        if(badge){ badge.textContent='WB Live'; badge.className='sec-hdr-badge badge-live'; }
+      }
+    }
+
+    updateDataDictEntry(meta.id, { status: 'live', value: display, year, fetched: now });
+    window._wbData = window._wbData || {};
+    window._wbData[code] = { value, year };
+  });
+
+  // Also store for regime classifier
+  if (window._wbData?.['NY.GDP.MKTP.KD.ZG']) {
+    window._wbGdpGrowth = window._wbData['NY.GDP.MKTP.KD.ZG'].value;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  ROLLING CORRELATION ENGINE (localStorage)
+//  Stores daily price snapshots, computes 90-day rolling
+//  Pearson r between each commodity and USD/ZAR
+// ══════════════════════════════════════════════════════
+const CORR_STORAGE_KEY = 'sa_macro_price_history';
+const CORR_WINDOW = 90; // days
+
+function loadPriceHistory() {
+  try {
+    const raw = localStorage.getItem(CORR_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function savePriceHistory(history) {
+  try {
+    // Keep last 120 days
+    const trimmed = history.slice(-120);
+    localStorage.setItem(CORR_STORAGE_KEY, JSON.stringify(trimmed));
+  } catch(e) {}
+}
+
+function addTodaySnapshot() {
+  const zar  = window._zarSpot;
+  const gold = window._liveCommodities?.gold;
+  const plat = window._liveCommodities?.plat;
+  const brent= window._liveCommodities?.brent;
+  const pall = window._liveCommodities?.pall;
+
+  if (!zar || !gold) return; // not enough live data
+
+  const today = new Date().toISOString().slice(0,10);
+  const history = loadPriceHistory();
+
+  // Remove today's entry if already exists (refresh scenario)
+  const filtered = history.filter(h => h.date !== today);
+  filtered.push({ date: today, zar, gold, plat: plat||null, brent: brent||null, pall: pall||null,
+    ironOre: 98.40, coal: 94.20, copper: 8950 }); // iron ore, coal, copper remain hardcoded
+  savePriceHistory(filtered);
+  return filtered;
+}
+
+function pearsonR(xs, ys) {
+  const n = xs.length;
+  if (n < 5) return null; // not enough data
+  const mx = xs.reduce((a,b)=>a+b,0)/n;
+  const my = ys.reduce((a,b)=>a+b,0)/n;
+  let num=0, dx2=0, dy2=0;
+  for(let i=0;i<n;i++) {
+    const dx=xs[i]-mx, dy=ys[i]-my;
+    num+=dx*dy; dx2+=dx*dx; dy2+=dy*dy;
+  }
+  if(dx2===0||dy2===0) return null;
+  return num/Math.sqrt(dx2*dy2);
+}
+
+function computeRollingCorrelations() {
+  const history = loadPriceHistory();
+  if (history.length < 5) return null; // fall back to hardcoded
+
+  const window_ = history.slice(-CORR_WINDOW);
+  const zars = window_.map(h => h.zar);
+
+  const series = {
+    'Gold':      window_.map(h => h.gold),
+    'Platinum':  window_.map(h => h.plat),
+    'Brent':     window_.map(h => h.brent),
+    'Iron Ore':  window_.map(h => h.ironOre),
+    'Coal':      window_.map(h => h.coal),
+    'Copper':    window_.map(h => h.copper),
+    'Palladium': window_.map(h => h.pall),
+  };
+
+  const correlations = {};
+  Object.entries(series).forEach(([name, vals]) => {
+    // Filter out null entries (paired removal)
+    const pairs = vals.map((v,i) => [v, zars[i]]).filter(([v,z]) => v !== null && z !== null);
+    if (pairs.length < 5) { correlations[name] = CORR_VALS[CORR_LABELS.indexOf(name)] ?? -0.5; return; }
+    const xs = pairs.map(p=>p[0]), ys = pairs.map(p=>p[1]);
+    const r = pearsonR(xs, ys);
+    correlations[name] = r !== null ? r : (CORR_VALS[CORR_LABELS.indexOf(name)] ?? -0.5);
+  });
+
+  return correlations;
+}
+
+function rebuildCorrChart() {
+  const corrs = computeRollingCorrelations();
+  const history = loadPriceHistory();
+  const dataPoints = history.length;
+
+  // Use computed if enough data, else hardcoded seed
+  const vals = CORR_LABELS.map(lbl => corrs ? (corrs[lbl] ?? -0.5) : (CORR_VALS[CORR_LABELS.indexOf(lbl)] ?? -0.5));
+  const isLive = dataPoints >= 10;
+
+  // Update chart
+  if(corrChart) corrChart.destroy();
+  corrChart = new Chart(document.getElementById('corr-chart').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels: CORR_LABELS,
+      datasets:[{
+        label: isLive ? `${Math.min(dataPoints,CORR_WINDOW)}-day Rolling r` : 'Seeded (building…)',
+        data: vals,
+        backgroundColor: vals.map(v => v < -0.6 ? 'rgba(45,217,122,0.55)' : v < -0.4 ? 'rgba(45,217,122,0.30)' : 'rgba(245,158,11,0.4)'),
+        borderColor:     vals.map(v => v < -0.6 ? 'rgba(45,217,122,0.9)'  : v < -0.4 ? 'rgba(45,217,122,0.6)'  : 'rgba(245,158,11,0.8)'),
+        borderWidth:1, borderRadius:2, indexAxis:'y'
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:true,position:'top',align:'end',labels:{boxWidth:12,font:{size:8}}},
+        tooltip:{callbacks:{label:ctx=>`r = ${ctx.parsed.x.toFixed(3)}`}} },
+      scales:{
+        x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{callback:v=>v.toFixed(1),font:{size:8}},
+          min:-1.05, max:0.2,
+          title:{display:true,text:`Commodity vs USD/ZAR · ${dataPoints < 10 ? 'Seeded — accumulating live data' : dataPoints + ' daily observations'}`,font:{size:8},color:'rgba(226,226,226,0.3)'}
+        },
+        y:{grid:{display:false},ticks:{font:{size:9}}}
+      }
+    }
+  });
+
+  updateDataDictEntry('corr-matrix', {
+    status: isLive ? 'live-computed' : 'seeded',
+    observations: dataPoints,
+    window: Math.min(dataPoints, CORR_WINDOW)
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  DATA DICTIONARY STATE
+//  Tracks each data series: source, type, last fetched
+// ══════════════════════════════════════════════════════
+const DATA_DICT = {
+  'usd-zar':      { series:'USD/ZAR', source:'Yahoo Finance · USDZAR=X via CORS proxy cascade', type:'Live', freq:'On refresh · intraday', url:'https://finance.yahoo.com' },
+  'eur-zar':      { series:'EUR/ZAR', source:'Yahoo Finance · EURZAR=X via CORS proxy cascade', type:'Live', freq:'On refresh · intraday', url:'https://finance.yahoo.com' },
+  'gbp-zar':      { series:'GBP/ZAR', source:'Yahoo Finance · GBPZAR=X via CORS proxy cascade', type:'Live', freq:'On refresh · intraday', url:'https://finance.yahoo.com' },
+  'brent':        { series:'Brent Crude', source:'Finnhub · USOIL', type:'Live', freq:'On refresh', url:'https://finnhub.io' },
+  'gold':         { series:'Gold XAU/USD', source:'Finnhub · XAUUSD', type:'Live', freq:'On refresh', url:'https://finnhub.io' },
+  'platinum':     { series:'Platinum XPT/USD', source:'Finnhub · XPTUSD', type:'Live', freq:'On refresh', url:'https://finnhub.io' },
+  'palladium':    { series:'Palladium XPD/USD', source:'Finnhub · XPDUSD', type:'Live', freq:'On refresh', url:'https://finnhub.io' },
+  'jse-top40':    { series:'JSE Top 40 (proxy)', source:'Finnhub · EZA ETF (USD-listed)', type:'Live proxy', freq:'On refresh', note:'EZA is iShares MSCI South Africa ETF, not the index directly', url:'https://finnhub.io' },
+  'repo-rate':    { series:'SARB Repo Rate', source:'SARB Selected Descriptive Statistics (scraped)', type:'Scrape', freq:'On refresh', url:'https://www.resbank.co.za' },
+  'sagb-curve':   { series:'SAGB Yield Curve', source:'SARB scrape (anchors) + hardcoded shape interpolation', type:'Scrape + model', freq:'On refresh', url:'https://www.resbank.co.za' },
+  'ls-stage':     { series:'Load Shedding Stage', source:'EskomSePush API', type:'Live', freq:'On refresh', url:'https://eskomsepush.co.za' },
+  'jse-equities': { series:'JSE Equity Prices', source:'Yahoo Finance v8 API via CORS proxy cascade (4 proxies)', type:'Live', freq:'On refresh', url:'https://finance.yahoo.com' },
+  'consensus':    { series:'Analyst Consensus', source:'Finnhub stock recommendations endpoint', type:'Live', freq:'On refresh', url:'https://finnhub.io' },
+  'news-macro':   { series:'Macro News Feed', source:'NewsAPI.org', type:'Live', freq:'On refresh', url:'https://newsapi.org' },
+  'news-stock':   { series:'Per-Stock News', source:'NewsAPI.org (company name query)', type:'Live', freq:'On refresh', url:'https://newsapi.org' },
+  'wb-gdp':       { series:'SA GDP Growth', source:'World Bank API · NY.GDP.MKTP.KD.ZG', type:'Live (annual)', freq:'Annual · World Bank release cycle', url:'https://api.worldbank.org' },
+  'wb-ca':        { series:'Current Account / GDP', source:'World Bank API · BN.CAB.XOKA.GD.ZS', type:'Live (annual)', freq:'Annual · World Bank release cycle', url:'https://api.worldbank.org' },
+  'wb-debt':      { series:'Debt / GDP', source:'World Bank API · GC.DOD.TOTL.GD.ZS', type:'Live (annual)', freq:'Annual · World Bank release cycle', url:'https://api.worldbank.org' },
+  'wb-res':       { series:'Gross FX Reserves', source:'World Bank API · FI.RES.TOTL.CD', type:'Live (annual)', freq:'Annual · World Bank release cycle', url:'https://api.worldbank.org' },
+  'cpi':          { series:'CPI Inflation', source:'Stats SA (hardcoded)', type:'Static', freq:'Monthly · manual update required', note:'Stats SA does not publish a structured API', url:'https://www.statssa.gov.za' },
+  'credit-ratings':{ series:'Sovereign Credit Ratings', source:'Moody\'s / S&P / Fitch (hardcoded)', type:'Static', freq:'Event-driven · manual update required', url:null },
+  'cds-spreads':  { series:'Sovereign CDS Spreads', source:'Hardcoded · last sourced Mar 2025', type:'Static — indicative only', freq:'Manual update required', note:'Live CDS requires IHS Markit / ICE Data Services (paid)', url:null },
+  'vol-surface':  { series:'USD/ZAR Vol Surface', source:'Indicative model values — not a live quote', type:'Model / indicative', freq:'Not refreshed', note:'Live OTC vol surface requires Bloomberg OVDV or Refinitiv (paid)', url:null },
+  'pmi':          { series:'PMI Composite', source:'Hardcoded · Absa/NBS/ISM/HCOB releases (Mar 2026)', type:'Static', freq:'Monthly · manual update required', note:'PMI data owned by S&P Global Markit — no free API', url:null },
+  'tot-hist':     { series:'Terms of Trade — Historical Series', source:'Hardcoded baseline · formula uses live commodity prices', type:'Hybrid', freq:'Live ratio; historical series static', url:null },
+  'freight':      { series:'BDI / SCFI / Port Data', source:'Hardcoded · Baltic Exchange / SSE / Transnet (Mar 2026)', type:'Static', freq:'Manual update required', note:'No free API for BDI or SCFI', url:null },
+  'china-demand': { series:'China Demand Indicators', source:'Hardcoded · NBS / Mysteel (Mar 2026)', type:'Static', freq:'Manual update required', note:'NBS data is published as press releases; Mysteel is paywalled', url:null },
+  'corr-matrix':  { series:'Commodity/ZAR Correlation', source:'Computed from localStorage price history (seeds hardcoded)', type:'Live-accumulating', freq:'Builds daily from live prices stored locally', url:null },
+  'iron-ore':     { series:'Iron Ore 62% Fe', source:'Hardcoded · SGX / Platts indicative (Mar 2025)', type:'Static', freq:'Manual update required', url:null },
+  'coal-api4':    { series:'Coal API4 (Richards Bay)', source:'Hardcoded · Argus Media indicative (Mar 2025)', type:'Static', freq:'Manual update required', url:null },
+  'gdp-card':     { series:'GDP Growth Card', source:'World Bank API (live annual) — falls back to hardcoded', type:'Live/Static hybrid', freq:'Annual', url:'https://api.worldbank.org' },
+  'ca-card':      { series:'Current Account Card', source:'World Bank API (live annual) — falls back to hardcoded', type:'Live/Static hybrid', freq:'Annual', url:'https://api.worldbank.org' },
+  'fiscal':       { series:'Budget Deficit', source:'National Treasury Budget Review 2025 (hardcoded)', type:'Static', freq:'Annual · manual update required', url:'https://www.treasury.gov.za' },
+  'regime':       { series:'Macro Regime Classifier', source:'Algorithmic — 6 signal dimensions', type:'Model', freq:'On refresh', note:'Regime output reflects live inputs (FX, commodities, load shedding) plus static inputs (CDS hardcoded, PMI hardcoded). Treat as indicative framework, not live signal.', url:null },
+};
+
+// Runtime status overlay — updated as fetches complete
+const _dictStatus = {};
+function updateDataDictEntry(id, updates) {
+  _dictStatus[id] = { ..._dictStatus[id], ...updates };
+  renderDataDictionary();
+}
+
+function renderDataDictionary() {
+  const container = document.getElementById('data-dict-body');
+  if (!container) return;
+
+  // Group by type
+  const typeOrder = ['Live','Live (derived)','Live proxy','Live (annual)','Scrape','Scrape + model','Live-accumulating','Hybrid','Live/Static hybrid','Model / indicative','Model','Static — indicative only','Static'];
+  const grouped = {};
+  typeOrder.forEach(t => grouped[t] = []);
+
+  Object.entries(DATA_DICT).forEach(([id, entry]) => {
+    const runtime = _dictStatus[id] || {};
+    const group = entry.type;
+    if (!grouped[group]) grouped[group] = [];
+    grouped[group].push({ id, ...entry, runtime });
+  });
+
+  const typeColor = {
+    'Live': '#2dd97a',
+    'Live (derived)': '#2dd97a',
+    'Live proxy': '#86efac',
+    'Live (annual)': '#5b8dee',
+    'Scrape': '#f59e0b',
+    'Scrape + model': '#f59e0b',
+    'Live-accumulating': '#2dd9c0',
+    'Hybrid': '#a78bfa',
+    'Live/Static hybrid': '#a78bfa',
+    'Model / indicative': '#94a3b8',
+    'Model': '#94a3b8',
+    'Static — indicative only': '#f04e52',
+    'Static': 'rgba(226,226,226,0.3)',
+  };
+
+  let html = '';
+  typeOrder.forEach(type => {
+    const entries = grouped[type];
+    if (!entries || !entries.length) return;
+    const col = typeColor[type] || 'rgba(226,226,226,0.3)';
+    html += `<div class="dd-group">
+      <div class="dd-type-header" style="color:${col};">${type} <span class="dd-count">(${entries.length})</span></div>`;
+    entries.forEach(e => {
+      const rStatus = e.runtime?.status;
+      const statusDot = rStatus === 'live' || rStatus === 'live-computed' ? '●' :
+                        rStatus === 'scrape-failed' ? '✕' :
+                        rStatus === 'wb-no-data' ? '○' : '·';
+      const dotCol = rStatus === 'live' || rStatus === 'live-computed' ? '#2dd97a' :
+                     rStatus === 'scrape-failed' ? '#f04e52' : 'rgba(226,226,226,0.2)';
+      const fetchedStr = e.runtime?.fetched ? `· fetched ${timeAgo(e.runtime.fetched)}` : '';
+      const valueStr = e.runtime?.value ? `· ${e.runtime.value}` : '';
+      html += `<div class="dd-row">
+        <span class="dd-dot" style="color:${dotCol};">${statusDot}</span>
+        <span class="dd-series">${e.series}</span>
+        <span class="dd-source">${e.source}${e.url ? ` <a href="${e.url}" target="_blank" rel="noopener">↗</a>` : ''}</span>
+        <span class="dd-freq">${e.freq}</span>
+        <span class="dd-meta">${valueStr} ${fetchedStr}</span>
+        ${e.note ? `<span class="dd-note">${e.note}</span>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+//  ORCHESTRATION
+// ══════════════════════════════════════════════════════
+async function fetchLiveData() {
+  await Promise.allSettled([
+    // Live price data
+    buildTicker().then(() => {
+      buildToT(true);
+      addTodaySnapshot();   // store today's prices to localStorage
+      rebuildCorrChart();   // recompute correlations with updated history
+    }),
+
+    // SARB scrape → then rebuild yield curve with live anchors
+    fetchSARBData().then(sarbData => {
+      buildYieldCurve(sarbData?.yieldsFound || null);
+    }),
+
+    // World Bank macro fundamentals
+    fetchWorldBank(),
+
+    // Other live sources
+    fetchLS(),
+    fetchEquities(),
+    fetchNews(),
+  ]);
+
+  // Re-run regime classifier with all updated inputs
+  const signals = computeRegimeSignals({
+    zarChgPct: 0,
+    spread2s10: window._sarbYields?.['10Y'] && window._sarbYields?.['2Y']
+      ? (window._sarbYields['10Y'] - window._sarbYields['2Y']) * 100
+      : 185,
+    commChgPct: window._lastCommChg || 0,
+    cdsSA: 218, // still hardcoded
+    pmiSA: 47.4, // still hardcoded
+    lsStage: window._lsStage || 0,
+    gdpGrowth: window._wbGdpGrowth || 1.2,
+  });
+  const { regime, confidence } = classifyRegime(signals);
+  renderRegime(signals, regime, confidence);
+
+  // Render final data dictionary state
+  renderDataDictionary();
+}
+
+// Static charts and initial dictionary render
+buildVolSurface();
+buildCDS();
+buildPMI();
+buildCorrChart();  // seeds from hardcoded on first load
+buildToT(null);
+renderDataDictionary(); // render initial state immediately
+
+// Live data
+fetchLiveData();
+</script>
+
+<!-- ══════════════════════════════════════════════════
+     DATA DICTIONARY FOOTER
+════════════════════════════════════════════════════ -->
+<footer id="data-footer">
+  <div class="df-inner">
+    <div class="df-header">
+      <div class="df-title">
+        <span class="df-title-label">Data Dictionary</span>
+        <span class="df-title-sub">Sources, methodology, and data type for every series displayed in this dashboard</span>
+      </div>
+      <div class="df-legend">
+        <span class="df-leg-item"><span style="color:#2dd97a;">●</span> Live API</span>
+        <span class="df-leg-item"><span style="color:#5b8dee;">●</span> Live (annual)</span>
+        <span class="df-leg-item"><span style="color:#f59e0b;">●</span> Scraped</span>
+        <span class="df-leg-item"><span style="color:#2dd9c0;">●</span> Accumulating</span>
+        <span class="df-leg-item"><span style="color:#a78bfa;">●</span> Hybrid</span>
+        <span class="df-leg-item"><span style="color:#94a3b8;">●</span> Model</span>
+        <span class="df-leg-item"><span style="color:rgba(226,226,226,0.3);">●</span> Static</span>
+        <span class="df-leg-item"><span style="color:#f04e52;">●</span> Static — indicative</span>
+      </div>
+      <button class="df-toggle" id="df-toggle-btn" onclick="toggleDataDict()">Show</button>
+    </div>
+    <div id="data-dict-body" class="df-body" style="display:none;"></div>
+    <div class="df-disclaimer">
+      This dashboard is for analytical and informational purposes only. It is not investment advice and does not constitute a solicitation or offer to buy or sell any financial instrument.
+      Live data is subject to API availability and CORS proxy reliability. Static and indicative values require manual updates and are clearly labelled.
+      Sovereign CDS, OTC vol surface, and PMI data are indicative only and sourced from public references as at March 2025.
+      For institutional-grade data, subscribe to Bloomberg, Refinitiv LSEG, or ICE Data Services.
+      <span id="sarb-scrape-status" style="color:var(--amber);margin-left:8px;"></span>
+    </div>
+  </div>
+</footer>
+
+<style>
+/* ── DATA DICTIONARY FOOTER ── */
+#data-footer {
+  border-top: 1px solid var(--border2);
+  background: var(--bg1);
+  margin-top: 40px;
+}
+.df-inner { max-width:1800px; margin:0 auto; padding:20px 28px; }
+.df-header {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  margin-bottom:4px;
+}
+.df-title { display:flex; flex-direction:column; gap:2px; flex:1; min-width:200px; }
+.df-title-label {
+  font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--gold);
+}
+.df-title-sub { font-size:9px; color:var(--text3); }
+.df-legend {
+  display:flex; gap:12px; flex-wrap:wrap; align-items:center;
+  font-size:9px; color:var(--text3); font-family:var(--mono);
+}
+.df-leg-item { display:flex; align-items:center; gap:4px; white-space:nowrap; }
+.df-toggle {
+  background:var(--gold-dim); border:1px solid rgba(200,168,75,.25); color:var(--gold);
+  font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+  padding:5px 12px; border-radius:3px; cursor:pointer; font-family:var(--mono);
+  transition:background .15s;
+}
+.df-toggle:hover { background:rgba(200,168,75,.2); }
+
+.df-body { margin-top:16px; }
+.df-group { margin-bottom:18px; }
+.dd-type-header {
+  font-size:9px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  margin-bottom:6px; padding-bottom:4px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:6px;
+}
+.dd-count { color:var(--text3); font-weight:400; }
+.dd-row {
+  display:grid;
+  grid-template-columns: 12px 180px 1fr 160px 140px;
+  gap:8px 16px;
+  align-items:start;
+  padding:5px 0;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  font-size:10px;
+}
+.dd-row:last-child { border-bottom:none; }
+.dd-dot   { font-size:8px; padding-top:1px; }
+.dd-series { color:var(--text); font-weight:500; }
+.dd-source { color:var(--text3); }
+.dd-source a { color:var(--gold); font-size:9px; }
+.dd-freq   { color:var(--text3); font-family:var(--mono); font-size:9px; }
+.dd-meta   { color:var(--text3); font-family:var(--mono); font-size:9px; }
+.dd-note   {
+  grid-column: 2 / -1;
+  font-size:9px; color:rgba(226,226,226,0.2);
+  font-style:italic; padding-bottom:2px;
+}
+
+.df-disclaimer {
+  margin-top:16px; padding-top:12px; border-top:1px solid var(--border);
+  font-size:9px; color:var(--text3); line-height:1.6;
+  max-width:1200px;
+}
+
+@media(max-width:900px) {
+  .dd-row { grid-template-columns: 12px 1fr 1fr; }
+  .dd-freq, .dd-meta { display:none; }
+}
+</style>
+
+<script>
+function toggleDataDict() {
+  const body = document.getElementById('data-dict-body');
+  const btn  = document.getElementById('df-toggle-btn');
+  const visible = body.style.display !== 'none';
+  body.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? 'Show' : 'Hide';
+}
+
+// Wire up World Bank card placeholders — add IDs to existing cards
+// These IDs are injected dynamically via fetchWorldBank()
+// We add placeholder wrappers with IDs here if not already present
+(function patchCardIDs() {
+  // CA balance card
+  const caEl = document.querySelector('#macro-cards .card:nth-child(6) .card-val');
+  if(caEl && !document.getElementById('ca-val')) caEl.id = 'ca-val';
+  // Debt card
+  const debtEl = document.querySelector('#macro-cards .card:nth-child(7) .card-val');
+  if(debtEl && !document.getElementById('debt-val')) debtEl.id = 'debt-val';
+  // Reserves card
+  const resEl = document.querySelector('#macro-cards .card:nth-child(8) .card-val');
+  if(resEl && !document.getElementById('res-val')) resEl.id = 'res-val';
+})();
+</script>
+
+</body>
+</html>
